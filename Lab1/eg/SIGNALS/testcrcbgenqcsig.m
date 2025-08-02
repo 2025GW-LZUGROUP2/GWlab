@@ -1,4 +1,4 @@
-% 此文中发现一个非常抽象的混乱：
+% 此文中发现一个非常抽象的问题：
 % 所谓的Nyqust frequency，似乎有两种定义方式
 % 一，临界采样频率，即PPT中的The critical sampling frequency$f_s = 2f_B$ is called the Nyquist frequency (or Nyquist rate) （临界采样频率 fs = 2fB 被称为Nyqust frequency（或Nyqust采样率）），这个值就将其称为Nyqust frequency
 % 二，采样率的一半，即f_s/2，我将其称为 Nyquist limit
@@ -141,3 +141,40 @@ ylabel('Frequency (Hz)');
 % ps - 功率谱密度或功率谱 矩阵
 % fc - 能量中心的频率和时间 矩阵
 % tc - 能量中心的频率和时间 矩阵
+
+%%# 频率相关概念
+
+%  1. 奈奎斯特频率（Nyquist frequency）
+
+% 根据提供的参考资料，奈奎斯特频率有两种常见含义：
+
+% - 严格定义（PPT中）：临界采样频率 fs = 2fB，即对带宽为fB的信号进行无损采样所需的最低采样频率。这是奈奎斯特采样定理中的核心概念。
+  
+% - 工程常用含义：采样频率的一半（fs/2），也称为奈奎斯特限制（Nyquist limit）。这表示在给定采样率下可以无混叠重建的最高信号频率。
+
+% 在代码中两种定义都有使用：
+% 第一种定义（临界采样频率）
+% nyqFreq = 2*maxFreq;  % 信号最大频率的两倍
+% 第二种定义（在FFT处理部分）
+% kNyq = floor(nSamples/2)+1;  % 对应采样率一半的FFT索引
+
+%  2. 带宽（bandwidth）
+% 带宽是指信号在频域中非零部分所占据的频率范围。
+% - 对于带限信号：频谱在[-fB, fB]范围之外为0，其中fB被称为带宽
+% - 在代码中，`maxFreq`（最大瞬时频率）相当于信号的带宽，因为它决定了信号频谱的范围
+
+%  3. 采样频率（sampling frequency）
+% 采样频率是指单位时间内对信号进行采样的次数，用fs表示，单位为Hz。
+% - 奈奎斯特定理要求：fs ≥ 2fB（采样频率必须至少是带宽的两倍）
+% - 在代码中：`samplFreq = 5*nyqFreq;`（实际采样频率设为临界采样频率的5倍，以确保充分采样）
+
+%  4. 循环频率（Cyclical frequencies）
+% 循环频率是指信号在单位时间内完成的周期数，单位为Hz。
+% - 在spectrogram函数中，参数`f`表示循环频率
+% - 在代码中，变量`posFreq`存储了正的循环频率值
+% - 循环频率反映了信号的物理频率特性
+
+%  5. 采样率（Sample rate）
+% 采样率与采样频率是同一概念，表示每秒钟采集的信号样本数。
+% - 在代码中用`samplFreq`表示
+% - 在spectrogram函数中用`fs`参数表示
