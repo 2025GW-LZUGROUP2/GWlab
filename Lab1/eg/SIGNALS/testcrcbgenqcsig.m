@@ -73,7 +73,7 @@ posFreq = (0:(kNyq-1))*(1/dataLen);
 % 正负频率部分是对称的，所以保留一半即可
 % 为什么后半部分对应于负频率？
 % X[k] = ∑ x[n]·e^(-j2πnk/N), k=0,1,...,N-1
-% 当k>2/N时有 e^(-j2πnk/N) = e^(-j2πn(k-N)/N)·e^(-j2πn) = e^(-j2πn(k-N)/N)，频率(k-N)/N <0
+% 当k>2/N时有 e^(-j2πnk/N) = e^(-j2πn(k-N)/N)·e^(-j2πn) = e^(-j2πn(k-N)/N)，频率(k-N)/N*delta=(k-N)/T(总周期长度) <0
 % 这是由傅立叶变换本身决定的
 fftSig = fftSig(1:kNyq);%只保留fftSig 1到kNyq的元素，(1:kNyq)是索引数组
 %Plot periodogram  % 绘制周期图
