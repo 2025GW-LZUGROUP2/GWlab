@@ -1,3 +1,4 @@
+clc;clear;
 % 此文中发现一个非常抽象的问题：
 % 所谓的Nyqust frequency，似乎有两种定义方式
 % 一，临界采样频率，即PPT中的The critical sampling frequency$f_s = 2f_B$ is called the Nyquist frequency (or Nyquist rate) （临界采样频率 fs = 2fB 被称为Nyqust frequency（或Nyqust采样率）），这个值就将其称为Nyqust frequency
@@ -8,7 +9,7 @@
 % Signal parameters  % 信号参数
 a1=10;
 a2=3;
-a3=3;%这是相位的三个参数
+a3=3;%这是相位的三个参数,
 A = 10;% SNR参数 即信噪比
 % Instantaneous frequency after 1 sec is  % 1秒后的瞬时频率为（因为瞬时频率是相位对时间求导，phi(t)=a1*t+a2*t^2+a3*t^3,so f(t)=dphi/dt=a1+2a2*t+3a3*t^2，t取1即得下式）
 % 因为采样时间只取0-1s，且瞬时频率单增，所以t=1就是最大频率时
@@ -24,7 +25,7 @@ samplIntrvl = 1/samplFreq;
 
 % Time samples  % 时间采样点(只取0-1s)
 timeVec = 0:samplIntrvl:1.0;
-% Number of samples  % 采样点数量
+% Number of samples  % 采样点数量   
 nSamples = length(timeVec);
 
 % Generate the signal   生成信号

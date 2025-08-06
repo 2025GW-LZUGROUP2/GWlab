@@ -1,5 +1,5 @@
 % 定义符号变量
-syms t a_1 a_2 a_3 A;
+syms  a_1 a_2 a_3 A;
 
 % 创建信号表达式
 sigExpr = A*sin(2*pi*(a_1*t + a_2*t^2 + a_3*t^3));
@@ -12,7 +12,7 @@ coeffValues = [1, 0.5, 0.1, 2];
 timeVec = 0:0.05:1;
 
 % 创建信号对象
-signalObj = Signal('QuadraticChirp', timeVec,sigExpr, coeffNames, coeffValues );
+signalObj = Signal('QuadraticChirp', timeVec,sigExpr, t,coeffNames, coeffValues );
 
 % 绘制信号
 plot(signalObj.timeVec, signalObj.SigVec);

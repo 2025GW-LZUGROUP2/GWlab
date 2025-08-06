@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "MATLAB: 运行当前文件",
+            "type": "matlab",
+            "request": "launch"
+        },
+        {
+            "name": "MATLAB: 启动交互模式",
+            "type": "matlab",
+            "request": "launch"
+        }
+    ]
+}
