@@ -3,11 +3,12 @@
 clear;clc;
 % 定义符号变量
 syms t;
-timeInterval = [0, 1]; % 时间区间[0,1]
-fsInit = 300; % 先给一个较高的采样率，保证后续分析准确
-timeLength = timeInterval(2) - timeInterval(1);
-timeVec = (timeInterval(1):1 / fsInit:timeInterval(2));
+timeInterval = [0, 1]; % 时间区间 [0,1]
+fsInit = 300; % 初始采样率，确保分析准确
+timeLength = timeInterval(2) - timeInterval(1); % 信号时长
+timeVec = (timeInterval(1):1 / fsInit:timeInterval(2)); % 时间向量
 
+% 加载信号定义文件
 run(fullfile(fileparts(mfilename('fullpath')), 'Lab1SigDef.m'))
 %%
 SigNow = Sig_AMFM; % 当前信号
@@ -25,33 +26,38 @@ phiNow = [];%如果不是正弦类信号就保留本行，取消本行的注释
 % AM        Amplitude Modulated (AM) Sinusoid      幅度调制正弦信号
 % AMFM      AM-FM Sinusoid                         幅度-频率调制正弦信号
 % ----------------------------------------------------------
-maxFreq = ExactEstmFreqBW(SigNow);
-NyqFreq = 2 * maxFreq;
+
+%% 估计最大频率和采样率
+maxFreq = ExactEstmFreqBW(SigNow); % 估计信号的最大频率
+NyqFreq = 2 * maxFreq; % 奈奎斯特频率
 a = timeInterval(1); b = timeInterval(2);
 fs = 5 * NyqFreq; % 自动估计采样率
-delta = 1 / fs;
-timeVec = a:delta:b;
+delta = 1 / fs; % 采样间隔
+timeVec = a:delta:b; % 更新时间向量
 SigNow.timeVec = timeVec;
-SigVec = SigNow.SigVec;
-SigVec = SigVec / norm(SigVec);
-N = length(timeVec);
+SigVec = SigNow.SigVec; % 获取信号向量
+SigVec = SigVec / norm(SigVec); % 归一化信号
+N = length(timeVec); % 信号长度
 
-fftVec = fft(SigVec);
-fftShiftVec = fftshift(fftVec);
+%% 计算频谱
+fftVec = fft(SigVec); % 快速傅里叶变换
+fftShiftVec = fftshift(fftVec); % 移动零频到中心
+AllFreqVec = ((0:N - 1) - floor(N / 2)) * (fs / N); % 包含正负频率的频率向量
+ESD = delta ^ 2 * abs(fftShiftVec) .^ 2; % 能量谱密度
+allEnergy = trapz(timeVec, SigVec .^ 2); % 总能量
 
-AllFreqVec = ((0:N - 1) - floor(N / 2)) * (fs / N); %包含正负频率的频率向量
-ESD = delta ^ 2 * abs(fftShiftVec) .^ 2;
-allEnergy = trapz(timeVec, SigVec .^ 2);
-
+%% 绘制信号
 figure;
 plot(timeVec, SigVec, 'Marker', '.', 'MarkerSize', 20);
 xlabel('Time/s');
 ylabel('Signal');
 
-%% 验证理论最大瞬时频率和估计的频率带宽是否接近
+title('信号时域图 / Time Domain Signal');
+
+%% 验证理论最大瞬时频率
 % 如果信号是标准的正弦类信号
 if ~isempty(phiNow)
-    InstFreq = diff(phiNow, t) / (2 * pi);
+    InstFreq = diff(phiNow, t) / (2 * pi); % 计算瞬时频率
     fprintf(['如果信号是标准的正弦类信号，' ...
              '则需要通过比较最终FreqBandWidth和理论最大瞬时频率估计值的接近程度\n']);
     sym_val = [];

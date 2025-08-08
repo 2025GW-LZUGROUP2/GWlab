@@ -42,23 +42,23 @@ else
     fs = varargin{1};
 end
 delta = 1/fs;                % 采样间隔
-timeVec = a:delta:b;         % 离散时间向量
+timeVec = a:delta:b;% 离散时间向量
 sVec = double(subs(s_t, indpVar, timeVec)); % 离散信号
-N = length(timeVec);         % 采样点数
+N = length(timeVec);% 采样点数
 
 %% 频域计算（FFT+ESD+总能量）
-foufun = fftshift(fft(sVec));               % 双边FFT
-freqVec = ((0:N-1)-floor(N/2))*(fs/N);      % 双边频率轴（1D）
-ESD = delta^2 * abs(foufun).^2;             % 能量谱密度（ESD）
-allEnergy = trapz(timeVec, sVec.^2);        % 时域总能量（帕塞瓦尔定理验证）
+foufun = fftshift(fft(sVec)); % 双边FFT
+freqVec = ((0:N-1)-floor(N/2))*(fs/N);% 双边频率轴（1D）
+ESD = delta^2 * abs(foufun).^2;   % 能量谱密度（ESD）
+allEnergy = trapz(timeVec, sVec.^2);% 时域总能量（帕塞瓦尔定理验证）
 
 %% 定义目标函数（避免trapz报错）
 objFun = @(mf) (getEnergy(mf, freqVec, ESD) - 0.99*allEnergy).^2;
 
 %% 动态扩展的PSO全局探索
-initialUB = 100;       % 初始上界（Hz）
-popSize = 50;          % 种群大小（平衡探索与效率）
-maxGen = 200;          % 每轮PSO最大迭代次数
+initialUB = 100;% 初始上界（Hz）
+popSize = 50;     % 种群大小（平衡探索与效率）
+maxGen = 200; % 每轮PSO最大迭代次数
 expandThreshold = 0.9; % 最优解超过上界×0.9则扩展
 
 currentUB = initialUB;
