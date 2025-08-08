@@ -1,35 +1,39 @@
+% testExactEstmFreqBW.m
 %% 该文件测试了ExactEstmFreqBW.m及其附属函数estmFreqBW.m getEnergy.m
 clear;clc;
 % 定义符号变量
-syms t A a_1 a_2 a_3;
+syms t;
 timeInterval = [0, 1]; % 时间区间[0,1]
-fsInit = 1000; % 先给一个较高的采样率，保证后续分析准确
+fsInit = 300; % 先给一个较高的采样率，保证后续分析准确
 timeLength = timeInterval(2) - timeInterval(1);
 timeVec = (timeInterval(1):1 / fsInit:timeInterval(2));
-% 创建信号表达式
-phi = 2 * pi * (a_1 * t + a_2 * t ^ 2 + a_3 * t ^ 3);
-sigExpr_qc = A * sin(phi);
 
-% 定义系数名称和值
-coeffNames_qc = {'a_1', 'a_2', 'a_3', 'A'};
-coeffValues_qc = [10, 3, 3, 10];
-Sigqc = Signal('QuadraticChirp', timeVec, sigExpr_qc, ...
-    t, coeffNames_qc, coeffValues_qc);
-SineGausSig = A * exp(- (t - 0.5) ^ 2 / (2 * 0.5 ^ 2)) * sin(2 * pi * 20 * t + 0);
-SigNow = Sigqc; % 当前信号
-
+run(fullfile(fileparts(mfilename('fullpath')), 'Lab1SigDef.m'))
+%%
+SigNow = Sig_AMFM; % 当前信号
+% phiNow = phi_FM; %是正弦类信号就保留（即能否通过表达式直接算出瞬时最大频率），如果不是请注释掉这行
+phiNow = [];%如果不是正弦类信号就保留本行，取消本行的注释
+%后缀可选：
+% 后缀      英文含义                               中文含义
+% ----------------------------------------------------------
+% qc        Quadratic Chirp                        二次调频信号
+% lc        Linear Chirp                           线性调频信号
+% ss        Sinusoidal Signal                      正弦信号
+% FM        Frequency Modulated (FM) Sinusoid      频率调制正弦信号
+% 以下是非标准正弦类，phiNow =?；一行需要注释掉
+% Sg        Sine-Gaussian Signal                   正弦-高斯信号
+% AM        Amplitude Modulated (AM) Sinusoid      幅度调制正弦信号
+% AMFM      AM-FM Sinusoid                         幅度-频率调制正弦信号
+% ----------------------------------------------------------
 maxFreq = ExactEstmFreqBW(SigNow);
-
 NyqFreq = 2 * maxFreq;
-
 a = timeInterval(1); b = timeInterval(2);
 fs = 5 * NyqFreq; % 自动估计采样率
 delta = 1 / fs;
 timeVec = a:delta:b;
 SigNow.timeVec = timeVec;
-% SigNow=SigNow;
 SigVec = SigNow.SigVec;
-% SigVec=SigVec/norm(SigVec);
+SigVec = SigVec / norm(SigVec);
 N = length(timeVec);
 
 fftVec = fft(SigVec);
@@ -46,8 +50,8 @@ ylabel('Signal');
 
 %% 验证理论最大瞬时频率和估计的频率带宽是否接近
 % 如果信号是标准的正弦类信号
-if ~isempty(phi)
-    InstFreq = diff(phi, t) / (2 * pi);
+if ~isempty(phiNow)
+    InstFreq = diff(phiNow, t) / (2 * pi);
     fprintf(['如果信号是标准的正弦类信号，' ...
              '则需要通过比较最终FreqBandWidth和理论最大瞬时频率估计值的接近程度\n']);
     sym_val = [];

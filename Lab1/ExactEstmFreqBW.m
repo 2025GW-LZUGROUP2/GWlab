@@ -1,13 +1,36 @@
-function FreqBandWidth = ExactEstmFreqBW( Signal, varargin)
-% ExactEstmFreqBW 通过PSO算法更精确地估算频率带宽(Frequency Band Width)
+function FreqBandWidth = ExactEstmFreqBW(Signal, varargin)
+%ExactEstmFreqBW  Exactly estimate frequency band width通过PSO算法精确估算信号的频率带宽（Frequency Band Width）
 %
-% 输入：
-%   s_t: 符号函数，如sin(2*pi*(3*t^3+3*t^2+10*t))
-%   indpVar：符号变量，如sym('t') （即s_t中的变量）
-%   timeInterval: 时间区间，如[0,1]（a=0, b=1）
-%   varargin: 采样率fs，默认自动估计可选参数（使用estmFreqBW函数粗估）
-% 输出：
-%   FreqBandWidth: 覆盖99%能量的最小频率
+%   FreqBandWidth = ExactEstmFreqBW(Signal)
+%   FreqBandWidth = ExactEstmFreqBW(Signal, fs)
+%
+%   该函数利用粒子群优化（PSO）算法和局部梯度优化，自动搜索使信号能量覆盖99%的最小频率带宽。
+%
+%   输入参数
+%   ----------
+%   Signal : Signal类对象
+%       包含信号表达式、时间向量、变量名等信息，需已完成参数替换。
+%   fs : double, 可选
+%       采样率（Hz）。如未指定，将自动根据信号粗略带宽估算。
+%
+%   输出参数
+%   ----------
+%   FreqBandWidth : double
+%       覆盖信号99%能量的最小频率（Hz）。
+%
+%   示例
+%   ----------
+%   s = Signal(...); % 构造信号对象
+%   bw = ExactEstmFreqBW(s);
+%
+%   说明
+%   ----------
+%   - 本函数先用estmFreqBW粗估带宽，再用PSO+梯度法精细搜索。
+%   - 适用于非平稳、复杂调制等一般信号。
+%   - 依赖 getEnergy, estmFreqBW, particleswarm, fminunc 等函数。
+%
+%   作者：2025GW-LZUGROUP2
+%   日期：2025-08-08
 
 %% 参数预处理
 s_t=Signal.SigExpr_with_coeff;
