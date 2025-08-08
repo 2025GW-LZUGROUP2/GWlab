@@ -2,19 +2,20 @@
 %我们定义了一个类Signal 用于描述和生成参数化数学信号，支持符号表达式、参数替换和信号向量生成。
 %请使用命令help Signal;help ExactEstmFreqBW;以帮助你理解此文件
 
-clc;clear;
+clc; clear;
 % 定义符号变量
 syms t;
+SNR = 10; %信噪比
 tIntvl = [0, 1]; % timeInterval 时间区间[0,1]
 fsInit = 300; % 先给一个较高的采样率，保证后续分析准确
 timeLength = tIntvl(2) - tIntvl(1);
 timeVec = (tIntvl(1):1 / fsInit:tIntvl(2));
-run(fullfile(fileparts(mfilename('fullpath')), 'Lab1SigDef.m'))%引用Lab1SigDef.m文件(这个文件定义了各个信号)
+run(fullfile(fileparts(mfilename('fullpath')), 'Lab1SigDef.m')) %引用Lab1SigDef.m文件(这个文件定义了各个信号)
 
 %%
-SigNow = Sig_qc; % 当前信号
-phiNow = phi_qc; %是正弦类信号就保留（即能否通过表达式直接算出瞬时最大频率），如果不是请注释掉这行
-% phiNow = [];%如果不是正弦类信号就保留本行，取消本行的注释
+SigNow = Sig_AM; % 当前信号
+% phiNow = phi_qc; %是正弦类信号就保留（即能否通过表达式直接算出瞬时最大频率），如果不是请注释掉这行
+phiNow = []; %如果不是正弦类信号就保留本行，取消本行的注释
 %后缀可选：
 % 后缀      英文含义                               中文含义
 % ----------------------------------------------------------
@@ -29,20 +30,19 @@ phiNow = phi_qc; %是正弦类信号就保留（即能否通过表达式直接�
 % ----------------------------------------------------------
 maxFreq = ExactEstmFreqBW(SigNow);
 NyqFreq = 2 * maxFreq;
-sampFreq=5*NyqFreq;%采样频率 5倍安全系数
-sampIntvl=1/sampFreq;
-timeVec=tIntvl(1):sampIntvl:tIntvl(2);
-SigNow.timeVec = timeVec;%更新SigNow，使其生成正确的SigVec
-SigVec = SigNow.SigVec;%取出生成的SigVec
-SigVec = SigVec / norm(SigVec);%归一化
-N = length(timeVec);%时间向量的分量数
+sampFreq = 5 * NyqFreq; %采样频率 5倍安全系数
+sampIntvl = 1 / sampFreq;
+timeVec = tIntvl(1):sampIntvl:tIntvl(2);
+SigNow.timeVec = timeVec; %更新SigNow，使其生成正确的SigVec
+SigVec = SigNow.SigVec; %取出生成的SigVec
+SigVec = SNR * SigVec / norm(SigVec); %归一化
+N = length(timeVec); %时间向量的分量数
 fftVec = fft(SigVec);
 %% 画信号图，信号的Signal-Time图
 figure;
 plot(timeVec, SigVec, 'Marker', '.', 'MarkerSize', 20);
 xlabel('Time/s');
 ylabel('Signal');
-
 
 %% 画Periodogram图，信号的|fft|-f图
 fprintf('判断标准：如果0-NyqFreq区间内，覆盖了|fft|的绝大部分面积，即可认为maxFreq估计正确');
@@ -81,4 +81,15 @@ legend([fftline, h1, h2], {'|fft|', 'max Frequency(band width)', 'Nyquist Freque
 %         8192 (默认值) | 正标量
 %       nBits - 采样位数。
 %         16 (默认值) | 8 | 24
-%% 
+%% 画出时频图
+figure;
+winTlen = 0.2/20; % second
+ovlTlen = 0.1/20; % second
+winSamplN = floor(winTlen * sampFreq * 10);
+ovlSamplN = floor(ovlTlen * sampFreq * 10);
+[S, F, T] = spectrogram(SigVec, winSamplN, ovlSamplN, [], sampFreq * 10);
+imagesc(T, F, abs(S));
+axis xy;
+xlabel('Time /s'); ylabel('Frequency /Hz')
+
+
