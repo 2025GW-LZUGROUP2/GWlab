@@ -8,9 +8,9 @@ t0=timeInterval(1);t1=timeInterval(2);% 定义要处理的时间区间
 syms t A a_1 a_2 a_3;
 sigExpr = A*sin(2*pi*(a_1*t + a_2*t^2 + a_3*t^3));% 创建信号表达式
 coeffNames = {'a_1', 'a_2', 'a_3', 'A'};% 定义系数名称和值
-coeffValues = [1, 0.5, 0.1, 2];
+coeffValues = [10, 3, 3, 10];
 
-qcSig=Signal('QuadraticChirp',[],sigExpr,coeffNames,coeffValues);
+qcSig=Signal('QuadraticChirp',[],sigExpr,t,coeffNames,coeffValues);
 
 [a_1,a_2,a_3]=deal(10,5,8);
 A=10;

@@ -18,14 +18,49 @@ classdef Signal
             obj.coeffName=coeffNames;
             obj.coeffValue=coeffValues;
             obj.timeVec=timeVec;
-            % syms indpVar;
-            sym_val=[];
-            for i=1:length(coeffNames)
-                sym_val=[sym_val,sym(coeffNames{i})];
-            end
-            SigExpr_with_coeff=subs(SigExpr,sym_val,coeffValues);
+            obj=obj.updateOutputs();
+        end
+        function obj=set.name(obj,val)
+            obj.name=val;
+            obj=obj.updateOutputs();
+        end
+        function obj=set.timeVec(obj,val)
+            obj.timeVec=val;
+            obj=obj.updateOutputs();
+        end
+        function obj=set.SigExpr(obj,val)
+            obj.SigExpr=val;
+            obj=obj.updateOutputs();
+        end
+        function obj=set.indpVar(obj,val)
+            obj.indpVar=val;
+            obj=obj.updateOutputs();
+        end
+        function obj=set.coeffName(obj,val)
+            obj.coeffName=val;
+            obj=obj.updateOutputs();
+        end
+        function obj=set.coeffValue(obj,val)
+            obj.coeffValue=val;
+            obj=obj.updateOutputs();
+        end
 
-            obj.SigVec=double(subs(SigExpr_with_coeff,indpVar,timeVec));
+
+        function obj=updateOutputs(obj)
+            if isempty(obj.SigExpr) || isempty(obj.indpVar) || isempty(obj.coeffName) || isempty(obj.coeffValue)
+                obj.SigExpr_with_coeff = [];
+                obj.SigVec = [];
+                return;
+            end
+            sym_val=[];
+            for i=1:length(obj.coeffName)
+                sym_val=[sym_val,sym(obj.coeffName{i})];
+            end
+            obj.SigExpr_with_coeff=subs(obj.SigExpr,sym_val,obj.coeffValue);
+
+            obj.SigVec=double(subs(obj.SigExpr_with_coeff,obj.indpVar,obj.timeVec));
+
+
         end
     end
 end

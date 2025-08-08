@@ -1,5 +1,6 @@
+clc;clear;
 % 定义符号变量
-syms  a_1 a_2 a_3 A;
+syms  t A a_1 a_2 a_3 ;
 
 % 创建信号表达式
 sigExpr = A*sin(2*pi*(a_1*t + a_2*t^2 + a_3*t^3));

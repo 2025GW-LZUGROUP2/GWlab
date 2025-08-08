@@ -1,24 +1,26 @@
-function FreqBandWidth = ExactEstmFreqBW(s_t,sym_var, timeInterval, varargin)
+function FreqBandWidth = ExactEstmFreqBW( Signal, varargin)
 % ExactEstmFreqBW 通过PSO算法更精确地估算频率带宽(Frequency Band Width)
 %
 % 输入：
 %   s_t: 符号函数，如sin(2*pi*(3*t^3+3*t^2+10*t))
-%   sym_var：符号变量，如sym('t') （即s_t中的变量）
+%   indpVar：符号变量，如sym('t') （即s_t中的变量）
 %   timeInterval: 时间区间，如[0,1]（a=0, b=1）
 %   varargin: 采样率fs，默认自动估计可选参数（使用estmFreqBW函数粗估）
 % 输出：
 %   FreqBandWidth: 覆盖99%能量的最小频率
 
 %% 参数预处理
-a = timeInterval(1); b = timeInterval(2);
+s_t=Signal.SigExpr_with_coeff;
+indpVar=Signal.indpVar;
+a = Signal.timeVec(1); b = Signal.timeVec(end);
 if isempty(varargin)
-    fs = 5*2*estmFreqBW(s_t,sym_var, a, b); % 自动估计采样率
+    fs = 5*2*estmFreqBW(s_t,indpVar,a,b); % 自动估计采样率
 else
     fs = varargin{1};
 end
 delta = 1/fs;                % 采样间隔
 timeVec = a:delta:b;         % 离散时间向量
-sVec = double(subs(s_t, sym_var, timeVec)); % 离散信号
+sVec = double(subs(s_t, indpVar, timeVec)); % 离散信号
 N = length(timeVec);         % 采样点数
 
 %% 频域计算（FFT+ESD+总能量）

@@ -1,11 +1,24 @@
+%% 该文件测试了ExactEstmFreqBW.m及其附属函数estmFreqBW.m getEnergy.m
 clear;clc;
-syms t;
-A=10;
-phi= 2*pi*( 3*t^3  +3*t^2 +10*t);
-SigVec =A* sin(phi); % 相位信号
-timeInterval = [0, 1];                   % 时间区间[0,1]
+% 定义符号变量
+syms  t A a_1 a_2 a_3 ;
+timeInterval = [0, 1];  % 时间区间[0,1]
+fsInit = 1000; % 先给一个较高的采样率，保证后续分析准确
 timeLength=timeInterval(2)-timeInterval(1);
-maxFreq = ExactEstmFreqBW(SigVec,t, timeInterval);
+timeVec=(timeInterval(1):1/fsInit:timeInterval(2));
+% 创建信号表达式
+phi=2*pi*(a_1*t + a_2*t^2 + a_3*t^3);
+sigExpr_qc = A*sin(phi);
+
+% 定义系数名称和值
+coeffNames_qc = {'a_1', 'a_2', 'a_3', 'A'};
+coeffValues_qc = [10, 3, 3, 10];
+Sigqc=Signal('QuadraticChirp',timeVec,sigExpr_qc, ...
+    t,coeffNames_qc, coeffValues_qc );
+SineGausSig=A*exp(-(t-0.5)^2/(2*0.5^2))*sin(2*pi*20*t+0);
+SigNow=Sigqc; % 当前信号
+
+maxFreq = ExactEstmFreqBW(SigNow);
 
 NyqFreq = 2*maxFreq;
 
@@ -13,8 +26,10 @@ a = timeInterval(1); b = timeInterval(2);
 fs = 5*NyqFreq; % 自动估计采样率
 delta = 1/fs;
 timeVec = a:delta:b;
-SigVec = double(subs(SigVec, t, timeVec));
-SigVec=SigVec/norm(SigVec);
+SigNow.timeVec=timeVec;
+% SigNow=SigNow;
+SigVec = SigNow.SigVec;
+% SigVec=SigVec/norm(SigVec);
 N = length(timeVec);
 
 fftVec=fft(SigVec);
@@ -30,8 +45,18 @@ xlabel('Time/s');
 ylabel('Signal');
 
 %% 验证理论最大瞬时频率和估计的频率带宽是否接近
+% 如果信号是标准的正弦类信号
 InstFreq=diff(phi,t);
-
+fprintf(['如果信号是标准的正弦类信号，' ...
+    '则需要通过比较最终FreqBandWidth和理论最大瞬时频率估计值的接近程度\n']);
+sym_val=[];
+for i=1:length(SigNow.coeffName)
+sym_val=[sym_val,sym(SigNow.coeffName{i})];
+end
+InstFreq_with_coeff=subs(InstFreq,sym_val,SigNow.coeffValue);
+InstFreqVec=subs(InstFreq_with_coeff,t,timeVec);
+[~,t-InstFreq]=max(InstFreqVec);
+%SigNow.SigVec=double(subs(SigNow.SigExpr_with_coeff,SigNow.indpVar,SigNow.timeVec));
 fprintf("理论最大瞬时频率估计值为%.2f Hz(若两值接近，则说明正确)",subs((diff(phi,t))/(2*pi),1));
 
 %% 如果信号不是标准的正弦类信号
@@ -41,7 +66,7 @@ NyqLimIdx = floor(N/2)+1;%Nyquist Limit频率所对应的指数 Nyquist Limit In
 posFreq=(0:(NyqLimIdx-1)/timeLength);
 fftVec_posFreq=fftVec(1:NyqLimIdx);
 figure('Name','判断maxFreq是否估计正确','Position',[100 100 800 600]);
-plot(posFreq,abs(fftVec_posFreq));
+fftline=plot(posFreq,abs(fftVec_posFreq));
 hold on ;
 xlabel("频率Frequency(Hz)");
 ylabel("|fft|");
@@ -50,12 +75,11 @@ ylabel("|fft|");
 fillX = [posFreq(posFreq <= NyqFreq), NyqFreq]; % 添加 NyqFreq 作为最后一个点
 fillY = [abs(fftVec_posFreq(1:sum(posFreq <= NyqFreq))), 0]; % 对应 NyqFreq 的 y 值为 0
 fill([fillX, flip(fillX)], [fillY, zeros(size(fillY))], 'cyan', 'FaceAlpha', 0.3, 'EdgeColor', 'none');
-xline(maxFreq,'r--','LineWidth',1);
-xline(NyqFreq,'b--','LineWidth',1);
+h1=xline(maxFreq,'r--','LineWidth',1);
+h2=xline(NyqFreq,'b--','LineWidth',1);
 grid on ;
-length(posFreq)
+legend([fftline,h1,h2],{'|fft|','max Frequency(band width)','Nyquist Frequency'});
 
-length(abs(fftVec_posFreq))
 %% 查看ExactEstmFreqBW中目标函数的变化
 % % 定义本地objFun（与ExactEstmFreqBW.m中一致）
 % objFun = @(mf) (getEnergy(mf, AllFreqVec, ESD) - 0.999*allEnergy).^2;
