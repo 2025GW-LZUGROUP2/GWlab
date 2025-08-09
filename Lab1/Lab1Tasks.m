@@ -13,7 +13,7 @@ timeVec = (tIntvl(1):1 / fsInit:tIntvl(2));
 run(fullfile(fileparts(mfilename('fullpath')), 'Lab1SigDef.m')) %引用Lab1SigDef.m文件(这个文件定义了各个信号)
 
 %%
-SigNow = Sig_AM; % 当前信号
+SigNow = Sig_lc; % 当前信号
 % phiNow = phi_qc; %是正弦类信号就保留（即能否通过表达式直接算出瞬时最大频率），如果不是请注释掉这行
 phiNow = []; %如果不是正弦类信号就保留本行，取消本行的注释
 %后缀可选：
@@ -54,6 +54,7 @@ fftline = plot(posFreq, abs(fftVec_posFreq));
 hold on;
 xlabel("频率Frequency(Hz)");
 ylabel("|fft|");
+
 % 填充曲线下方的颜色
 fillX = [posFreq(posFreq <= NyqFreq), NyqFreq]; % 添加 NyqFreq 作为最后一个点
 fillY = [abs(fftVec_posFreq(1:sum(posFreq <= NyqFreq))), 0]; % 对应 NyqFreq 的 y 值为 0
@@ -62,7 +63,11 @@ h1 = xline(maxFreq, 'r--', 'LineWidth', 1);
 h2 = xline(NyqFreq, 'b--', 'LineWidth', 1);
 grid on;
 legend([fftline, h1, h2], {'|fft|', 'max Frequency(band width)', 'Nyquist Frequency'});
-
+%% compare
+figure("Name",'periodogram');
+[pxx, w] = periodogram(SigVec, rectwin(N), N, sampFreq); 
+plot(w,sqrt(length(pxx)*abs(pxx)))
+xlabel("频率Frequency(Hz)");
 %% Play the signal!
 % sound(SigNow.SigVec);
 %>> help sound
@@ -81,7 +86,7 @@ legend([fftline, h1, h2], {'|fft|', 'max Frequency(band width)', 'Nyquist Freque
 %         8192 (默认值) | 正标量
 %       nBits - 采样位数。
 %         16 (默认值) | 8 | 24
-%% 画出时频图
+%% 画出时频图spectrogram
 figure;
 winTlen = 0.2/20; % second
 ovlTlen = 0.1/20; % second
