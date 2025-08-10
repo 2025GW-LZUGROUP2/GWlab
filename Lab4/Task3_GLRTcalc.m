@@ -97,7 +97,7 @@ llr = innerProdPSD(dataVec, templateVec, sampFreq, psdPosFreq);
 % GLRT is its square GLRT是其平方。
 llr = llr ^ 2;
 disp(llr);
-myGLRT=glrtqcsig(dataVec,timeVec,psdPosFreq,SigNow);
+myGLRT=glrtqcsig(dataVec,timeVec,psdPosFreq,sigVec);
 fprintf('\n借助glrtqcsig函数算出的GLRT值为%.4f \n',myGLRT);
 %% Estimate the distribution of GLRT under the null and alternative hypotheses 估计GLRT在原假设和备择假设下的分布
 % Number of data realizations to generate under each hypothesis 在每个假设下生成的数据实现数量。
@@ -134,5 +134,5 @@ figure("Name",'Plot histograms 绘制直方图');
 hold on;
 histogram(glrtH0, 'Normalization', "pdf");
 histogram(glrtH1, 'Normalization', "pdf")
-legend('H0', 'H1');
+legend('H0 only Noise', 'H1 Noise+Signal');
 xlabel('GLRT');
