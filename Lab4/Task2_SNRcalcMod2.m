@@ -58,8 +58,12 @@ ylabel('PSD ((data unit)^2/Hz)');
 ligoSenData = load('InitlLIGOSensitivity.txt');
 ligoFreq=ligoSenData(:,1);
 ligoSqrtPSD=ligoSenData(:,2);
+ligoPSD=ligoSqrtPSD.^2;
+interpLigoPSD=interp1(ligoFreq,ligoPSD,posFreq,"spline");
+% idxf50=
+
 figure;
-plot(ligoFreq,log(ligoSqrtPSD.^2));
+
 
 %% Calculation of the norm 范数计算
 % Norm of signal squared is inner product of signal with itself 信号范数的平方是信号自身的内积
