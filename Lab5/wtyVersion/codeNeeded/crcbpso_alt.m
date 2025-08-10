@@ -1,64 +1,65 @@
-function returnData=crcbpso_alt(fitfuncHandle,nDim,varargin)
-% Local-best (lbest) PSO minimizer (implements flowchart in the CRC book)
-%P = CRCBPSO()
-%Simply returns a structure containing the PSO parameters and their default
-%values.
-%
-% S=CRCBPSO(Fhandle,N)
-% Runs local best PSO on the fitness function with handle Fhandle. If Fname
-% is the name of the function, Fhandle = @(x) <Fname>(x, FP).  N is the
-% dimensionality of the  fitness function.  The output is returned in the
-% structure S. The field of S are:
-%  'bestLocation : Best location found (in standardized coordinates)
-%  'bestFitness': Best fitness value found
-%  'totalFuncEvals': Total number of fitness function evaluations. This can
-%                    be less than the product of the number of iterations
-%                    and the number of particles since particles can leave
-%                    and re-enter the search space.
-%
-%S=CRCBPSO(Fhandle,N,P)
-%overrides the default PSO parameters with those provided in structure P.
-%Set any of the fields of P to [] in order to invoke the corresponding
-%default value. The fields of P are as follows.
-%     'popSize': Number of PSO particles
-%     'maxSteps': Number of iterations for termination
-%     'c1','c2': acceleration constant
-%     'maxVelocity': maximum value for each velocity component for all
-%                     subsequent iterations
-%     'startInertia': Starting value of inertia weight
-%     'endInertia': End value of inertia 
-%     'endInertiaIter': Iteration number at which endInertia is reached. If
-%     less than maxSteps, inertia stays constant at endInertia.
-%     'boundaryCond': Set to '' for the "let them fly" boundary condition.
-%                     Any other value is passed onto the fitness function
-%                     for further processing. 
-%     'nbrhdSz' : Number of particles in a ring topology neighborhood.
-%                 Reset to 3 if less than 3.
-%Setting P to [] will invoke the default values for all pso parameters.
-%NOTE: The optional P argument is normally to be used only for testing and
-%debugging (e.g., reduce the number of particles and/or iterations for a
-%quick run). Baseline default values are hardcoded in this function.
-%
-%S = CRCBPSO(Fhandle,N,P,O)
-%O is an integer that controls the amount of information returned in S. The
-%default value of O is zero and returns S as the struct defined above.
-%Progressively higher values of O increase the number of fields in S as
-%listed below.
-%   'allBestFit': O = 1. Best fitness values for all iterations returned as a vector.
-%   'allBestLoc': O = 2. Best locations in standardized coordinates for all
-%                 iterations returned as a row of a matrix. 
-%
-%Example:
-%nDim = 5;
-%fitFuncParams = struct('rmin',-5*ones(1,nDim),...
-%                           'rmax',5*ones(1,nDim));
-%fitFuncHandle = @(x) crcbpsotestfunc(x,fitFuncParams);
-%psoOut = crcbpso(fitFuncHandle,5);
 
-% Authors
-% Soumya D. Mohanty, Dec 2018
-% Adapted from LDACSchool/ldacpso.m
-% 
+function returnData=crcbpso_alt(fitfuncHandle,nDim,varargin)
+% Local-best (lbest) PSO minimizer (implements flowchart in the CRC book)  % 局部最优（lbest）PSO最小化器（实现CRC书中的流程图）
+%P = CRCBPSO()  % P = CRCBPSO()
+%Simply returns a structure containing the PSO parameters and their default  % 仅返回包含PSO参数及其默认值的结构体
+%values.  %
+%
+% S=CRCBPSO(Fhandle,N)  % S=CRCBPSO(Fhandle,N)
+% Runs local best PSO on the fitness function with handle Fhandle. If Fname  % 对适应度函数句柄Fhandle运行局部最优PSO。如果Fname是函数名，Fhandle = @(x) <Fname>(x, FP)。N为适应度函数的维数。
+% is the name of the function, Fhandle = @(x) <Fname>(x, FP).  N is the  % 输出以结构体S返回。S的字段有：
+% dimensionality of the  fitness function.  The output is returned in the  %
+% structure S. The field of S are:  %
+%  'bestLocation : Best location found (in standardized coordinates)  %  'bestLocation'：找到的最佳位置（标准化坐标）
+%  'bestFitness': Best fitness value found  %  'bestFitness'：找到的最佳适应度值
+%  'totalFuncEvals': Total number of fitness function evaluations. This can  %  'totalFuncEvals'：适应度函数总评估次数。该值可能小于迭代次数与粒子数的乘积，因为粒子可能离开并重新进入搜索空间。
+%                    be less than the product of the number of iterations  %
+%                    and the number of particles since particles can leave  %
+%                    and re-enter the search space.  %
+%
+%S=CRCBPSO(Fhandle,N,P)  % S=CRCBPSO(Fhandle,N,P)
+%overrides the default PSO parameters with those provided in structure P.  % 用结构体P中提供的参数覆盖默认PSO参数
+%Set any of the fields of P to [] in order to invoke the corresponding  % 将P的任意字段设为[]以调用对应的默认值
+%default value. The fields of P are as follows.  % P的字段如下：
+%     'popSize': Number of PSO particles  % 'popSize'：PSO粒子数
+%     'maxSteps': Number of iterations for termination  % 'maxSteps'：终止迭代次数
+%     'c1','c2': acceleration constant  % 'c1','c2'：加速常数
+%     'maxVelocity': maximum value for each velocity component for all  % 'maxVelocity'：所有后续迭代中每个速度分量的最大值
+%                     subsequent iterations  %
+%     'startInertia': Starting value of inertia weight  % 'startInertia'：惯性权重初始值
+%     'endInertia': End value of inertia   % 'endInertia'：惯性权重终值
+%     'endInertiaIter': Iteration number at which endInertia is reached. If  % 'endInertiaIter'：达到endInertia的迭代次数。如果小于maxSteps，惯性权重保持为endInertia。
+%     less than maxSteps, inertia stays constant at endInertia.  %
+%     'boundaryCond': Set to '' for the "let them fly" boundary condition.  % 'boundaryCond'：设为''表示“让其飞出”边界条件，其他值传递给适应度函数进一步处理
+%                     Any other value is passed onto the fitness function  %
+%                     for further processing.   %
+%     'nbrhdSz' : Number of particles in a ring topology neighborhood.  % 'nbrhdSz'：环形拓扑邻域中的粒子数
+%                 Reset to 3 if less than 3.  % 若小于3则重置为3
+%Setting P to [] will invoke the default values for all pso parameters.  % P设为[]将调用所有PSO参数的默认值
+%NOTE: The optional P argument is normally to be used only for testing and  % 注意：可选P参数通常仅用于测试和调试（如减少粒子数和/或迭代次数以快速运行）。
+%debugging (e.g., reduce the number of particles and/or iterations for a  % 基线默认值在本函数中硬编码。
+%quick run). Baseline default values are hardcoded in this function.  %
+%
+%S = CRCBPSO(Fhandle,N,P,O)  % S = CRCBPSO(Fhandle,N,P,O)
+%O is an integer that controls the amount of information returned in S. The  % O为整数，控制S中返回信息的多少。O的默认值为0，返回如上定义的S。
+%default value of O is zero and returns S as the struct defined above.  %
+%Progressively higher values of O increase the number of fields in S as  % O值越高，S中字段越多，具体如下：
+%listed below.  %
+%   'allBestFit': O = 1. Best fitness values for all iterations returned as a vector.  % 'allBestFit'：O=1时，所有迭代的最佳适应度值以向量返回
+%   'allBestLoc': O = 2. Best locations in standardized coordinates for all  % 'allBestLoc'：O=2时，所有迭代的最佳位置（标准化坐标）以矩阵行返回
+%                 iterations returned as a row of a matrix.   %
+%
+%Example:  % 示例：
+%nDim = 5;  % nDim = 5;
+%fitFuncParams = struct('rmin',-5*ones(1,nDim),...  % fitFuncParams = struct('rmin',-5*ones(1,nDim),...
+%                           'rmax',5*ones(1,nDim));  % 'rmax',5*ones(1,nDim));
+%fitFuncHandle = @(x) crcbpsotestfunc(x,fitFuncParams);  % fitFuncHandle = @(x) crcbpsotestfunc(x,fitFuncParams);
+%psoOut = crcbpso(fitFuncHandle,5);  % psoOut = crcbpso(fitFuncHandle,5);
+
+% Authors  % 作者
+% Soumya D. Mohanty, Dec 2018  % Soumya D. Mohanty, 2018年12月
+% Adapted from LDACSchool/ldacpso.m  % 改编自LDACSchool/ldacpso.m
+%   %
 
 %Baseline (also default) PSO parameters
 popsize=40;
