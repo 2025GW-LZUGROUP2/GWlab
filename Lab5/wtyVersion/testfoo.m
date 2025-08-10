@@ -18,7 +18,7 @@ N = length(timeVec); %时间向量的分量数
 timeLength=timeVec(end)-timeVec(1);
 fftVec = fft(SigVec);
 NyqLimIdx = floor(N / 2) + 1; %Nyquist Limit频率所对应的指数 Nyquist Limit Index(the the index when f=fs/2)
-posFreq = (0:(NyqLimIdx - 1) );
+posFreq = (0:(NyqLimIdx - 1)) * sampFreq / N;
 fftVec_posFreq = fftVec(1:NyqLimIdx);
 figure('Name', 'Periodogram(|fft|-f)', 'Position', [100 100 800 600]);
 fftline = plot(posFreq, abs(fftVec_posFreq));
