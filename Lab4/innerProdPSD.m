@@ -1,5 +1,29 @@
 function finalProd = innerProdPSD(xVal, yVal, sampFreq, PSD4posFreq)
-
+%innerProdPSD 计算带PSD加权的信号内积（频域）
+%   finalProd = INNERPRODPSD(xVal, yVal, sampFreq, PSD4posFreq)
+%   计算两个实信号xVal和yVal在给定功率谱密度(PSD)下的加权内积，常用于引力波等信号检测中的似然比检验。
+%
+%   输入参数：
+%     xVal         - 信号1的时域采样向量
+%     yVal         - 信号2的时域采样向量
+%     sampFreq     - 采样频率 (Hz)
+%     PSD4posFreq  - 正频率对应的PSD向量（长度应为floor(N/2)+1）
+%
+%   输出参数：
+%     finalProd    - 归一化后的内积（实数）
+%
+%   说明：
+%     该函数将输入信号变换到频域后，按PSD加权计算内积，常用于噪声加权的信号检测。
+%     PSD4posFreq应与正频率分量一一对应。
+%
+%   参考：
+%     见引力波数据分析教材、Matched Filtering等相关资料。
+%
+%   示例：
+%     prod = innerProdPSD(x, y, 1024, psdVec);
+%
+%   作者：2025GW-LZUGROUP2
+%   日期：2025-08-10
     nSamp = length(xVal);
 
     if nSamp ~= length(yVal)
