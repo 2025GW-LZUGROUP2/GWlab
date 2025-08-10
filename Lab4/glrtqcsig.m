@@ -37,9 +37,9 @@ function GLRTval= glrtqcsig(DataVec,TimeVec,PSDvec4pos,SigVec)
 % See also:
 %   normSig4PSD, innerProdPSD
 %
-% Author:
-%   [Your Name], [Date]
-%   [Your Name], [日期]
+%   作者：2025GW-LZUGROUP2
+    %   日期：2025-08-10
+
 
 
 %calculates the GLRT for a quadratic chirp signal with unknown amplitude
