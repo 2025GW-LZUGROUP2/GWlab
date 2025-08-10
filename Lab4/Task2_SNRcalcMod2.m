@@ -58,13 +58,27 @@ ylabel('PSD ((data unit)^2/Hz)');
 ligoSenData = load('InitlLIGOSensitivity.txt');
 ligoFreq=ligoSenData(:,1);
 ligoSqrtPSD=ligoSenData(:,2);
+idxFreq=(ligoFreq<=posFreq(end));
 ligoPSD=ligoSqrtPSD.^2;
-interpLigoPSD=interp1(ligoFreq,ligoPSD,posFreq,"spline");
-% idxf50=
+interpLigoPSD=interp1(ligoFreq,ligoPSD,posFreq,'linear');
+S50=interp1(ligoFreq,ligoPSD,50,'linear');
+interpLigoPSD(posFreq<50)=S50;
 
+% figure;
+% plot(ligoFreq(idxFreq),log10(ligoPSD(idxFreq)));
+
+% figure("Name",'log10(interpLigoPSD)');
+% plot(posFreq,log10(interpLigoPSD));
 figure;
-
-
+plot(ligoFreq(idxFreq), log10(ligoPSD(idxFreq)), 'o-', 'DisplayName', '原始LIGO数据');
+hold on;
+plot(posFreq, log10(interpLigoPSD), '.-', 'DisplayName', '插值后PSD');
+xlabel('Frequency (Hz)');
+ylabel('log_{10}(PSD)');
+legend;
+title('原始数据与插值后PSD对比');
+%% 决定使用哪个psdPosFreq，注释后就用noisePSD = @(f) (f >= 100 & f <= 300) .* (f - 100) .* (300 - f) / 10000 + 1;
+psdPosFreq=interpLigoPSD;
 %% Calculation of the norm 范数计算
 % Norm of signal squared is inner product of signal with itself 信号范数的平方是信号自身的内积
 normSigSqrd = innerProdPSD(SigVec, SigVec, sampFreq, psdPosFreq);
