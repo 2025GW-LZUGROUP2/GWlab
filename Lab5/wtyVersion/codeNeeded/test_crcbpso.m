@@ -54,31 +54,44 @@ plot(psoOut2.allBestFit);
 xlabel('Iteration number');
 ylabel('Global best fitness');
 title('Non-default PSO settings');
-if nDim == 2
+
+%% 2D Visualization (if desired)
+nDimVis = 2; % Set to 2 to enable 2D visualization
+if nDimVis == 2
+    rminVis = rmin;
+    rmaxVis = rmax;
+    ffparamsVis = struct('rmin',rminVis, 'rmax',rmaxVis);
+    fitFuncHandleVis = @(x) crcbpsotestfunc(x,ffparamsVis);
+    rng('default');
+    psoOutVis = crcbpso(fitFuncHandleVis, nDimVis, [], 2);
     %Plot the trajectory of the best particle 绘制最佳粒子的轨迹
     figure('Name', '最佳粒子轨迹');
     hold on;
     %Contour plot of the fitness function 适应度函数的等高线图
     %=======================
     %X and Y grids X和Y网格
-    xGrid = linspace(rmin,rmax,500);
-    yGrid = linspace(rmin,rmax,500);
+    xGrid = linspace(rminVis,rmaxVis,500);
+    yGrid = linspace(rminVis,rmaxVis,500);
     [X,Y] = meshgrid(xGrid,yGrid);
     %Standardize 标准化
-    Xstd = (X-rmin)/(rmax - rmin);
-    Ystd = (Y-rmin)/(rmax - rmin);
+    Xstd = (X-rminVis)/(rmaxVis - rminVis);
+    Ystd = (Y-rminVis)/(rmaxVis - rminVis);
     %Get fitness values 获取适应度值
-    fitVal4plot = fitFuncHandle([Xstd(:),Ystd(:)]);
+    fitVal4plot = fitFuncHandleVis([Xstd(:),Ystd(:)]);
     %Reshape array of fitness values 重塑适应度值数组
     fitVal4plot = reshape(fitVal4plot,size(X));
-    contour((xGrid-rmin)/(rmax-rmin), (yGrid - rmin)/(rmax - rmin), fitVal4plot);
+    contour((xGrid-rminVis)/(rmaxVis-rminVis), (yGrid - rminVis)/(rmaxVis - rminVis), fitVal4plot);
     %========================
-    plot(psoOut2.allBestLoc(:,1),psoOut2.allBestLoc(:,2),'.-');
+    plot(psoOutVis.allBestLoc(:,1),psoOutVis.allBestLoc(:,2),'.-');
     title('Trajectory of the best particle');
     legend('适应度等高线', '最佳粒子轨迹', 'Location', 'best');
     figure('Name', '适应度函数三维图');
     title('Plot of fitness function');
     surf(X,Y,fitVal4plot); shading interp;
+    stdCoordVis = psoOutVis.bestLocation;
+    [~,realCoordVis] = fitFuncHandleVis(stdCoordVis);
+    disp([' [2D] Best location:',num2str(realCoordVis)]);
+    disp([' [2D] Best fitness:', num2str(psoOutVis.bestFitness)]);
 end
 stdCoord = psoOut2.bestLocation;
 [~,realCoord] = fitFuncHandle(stdCoord);
