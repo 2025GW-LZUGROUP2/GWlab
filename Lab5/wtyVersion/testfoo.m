@@ -6,7 +6,7 @@ Parmt.a1=10;Parmt.a2=3;Parmt.a3=3;
 SNR=10;
 SigVec=foo(timeVec,SNR,Parmt);
 
-figure("Name",'间轴以秒为单位的信号时间序列图');
+figure("Name",'时间轴以秒为单位的信号时间序列图');
 plot(timeVec,SigVec);
 xlabel('Times/s');
 ylabel('Signal');
