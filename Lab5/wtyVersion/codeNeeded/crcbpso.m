@@ -228,7 +228,7 @@ gbestLoc = 2*ones(1,nDim);
 bestFitness = inf;
 pop(:,partCoordCols)=rand(popsize,nDim);
 %mount on our seeded locations
-if (nrowSeed>0) & (ncolSeed>0)
+if (nrowSeed>0) && (ncolSeed>0)
     pop(1:nrowSeed,1:ncolSeed)=seedMatrix;
 end
 pop(:,partVelCols)= -pop(:,partCoordCols) + rand(popsize,nDim);
