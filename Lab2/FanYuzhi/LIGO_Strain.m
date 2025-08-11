@@ -47,7 +47,7 @@ end
 figure;
 
 % GIF 文件名
-filename = 'Strain.gif';
+filename = 'LIGO Strain.gif';
 
 % 动画循环
 for i = 1:length(time)
