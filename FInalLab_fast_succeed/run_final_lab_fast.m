@@ -37,7 +37,7 @@ function results = run_final_lab_fast(varargin)
 %                PopSize       - 使用的种群大小
 %                NRuns         - 执行的独立运行次数
 %                UseParallel   - 是否使用了并行处理
-%
+%   eg:run_final_lab_fast('NRuns',2000)
 %   RUN_FINAL_LAB_FAST Optimized gravitational wave signal detection algorithm
 %   RESULTS = RUN_FINAL_LAB_FAST() runs the fast gravitational wave parameter
 %   estimation using default parameter settings.
