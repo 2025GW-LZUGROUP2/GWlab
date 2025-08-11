@@ -1,0 +1,11 @@
+   15.4899
+
+
+The GLRT value calculated using glrtqcsig function is 15.4899 (借助glrtqcsig函数算出的GLRT值为15.4899) 
+
+
+   10.0320
+
+
+The GLRT value calculated using glrtqcsig function is 10.0320 (借助glrtqcsig函数算出的GLRT值为10.0320) 
+>> 
