@@ -2,7 +2,7 @@ clc; clear;
 syms t;
 %
 %
-%注意，为了运行本文件，需要Lab1文件夹，至少需要其中的GWlab\Lab1\Lab1SigDef.m和GWlab\Lab1\Signal.m
+% Note: To run this file, you need Lab1 folder, at least GWlab\Lab1\Lab1SigDef.m and GWlab\Lab1\Signal.m (注意：运行本文件需Lab1文件夹)
 %
 %% Calculate GLRT for Quadratic chirp signal 计算二次调频信号的GLRT
 % Generalized Likelihood ratio test (GLRT) for a quadratic chirp when only the amplitude is unknown. 当仅幅度未知时，二次啁啾信号的广义似然比检验（GLRT）。
@@ -62,12 +62,12 @@ figure;
 LData=plot(timeVec, dataVec);%数据实现 = 噪声实现 + 信号
 hold on;
 LSig=plot(timeVec, sig4data);%信号
-legend([LData,LSig],'数据实现','信号')
-xlabel('Time (sec)')
-ylabel('Data');
-title('Data realization for calculation of LR 数据实现用于计算LR');
+legend([LData,LSig],'Data (数据实现)','Signal (信号)')
+xlabel('Time (sec) (时间(秒))')
+ylabel('Data (数据)');
+title('Data realization for calculation of LR (数据实现用于计算LR)');
 
-figure("Name",'Periodogram 周期图');
+figure("Name",'Periodogram (周期图)');
 kNyq = floor(nSamples / 2) + 1;
 dataLen = nSamples / sampFreq;
 posFreq = (0:(kNyq - 1)) * (1 / dataLen);
@@ -76,15 +76,15 @@ sigFFT = abs(fft(sig4data));
 LfftData=plot(posFreq, datFFT(1:kNyq));%数据
 hold on;
 LfftSig=plot(posFreq, sigFFT(1:kNyq));%信号
-legend([LfftData,LfftSig],'数据','信号')
-xlabel('Frequency (Hz)');
-ylabel('|fft|');
+legend([LfftData,LfftSig],'Data (数据)','Signal (信号)')
+xlabel('Frequency (Hz) (频率(赫兹))');
+ylabel('|FFT| (|傅里叶变换|)');
 
-figure("Name",'Spectrogram 时频图');
+figure("Name",'Spectrogram (时频图)');
 [S, F, T] = spectrogram(dataVec, 64, 60, [], sampFreq);
 imagesc(T, F, abs(S)); axis xy;
-xlabel('Time (sec)')
-ylabel('Frequency (Hz)');
+xlabel('Time (sec) (时间(秒))')
+ylabel('Frequency (Hz) (频率(赫兹))');
 
 %% Compute GLRT 计算GLRT
 % Generate the unit norm signal (i.e., template). As before, the value used for 'A' does not matter because we are going to normalize the signal anyway. 生成单位范数信号（即模板）。与之前一样，使用的“A”值无关紧要，因为我们无论如何都会对信号进行归一化。
@@ -98,7 +98,7 @@ llr = innerProdPSD(dataVec, templateVec, sampFreq, psdPosFreq);
 llr = llr ^ 2;
 disp(llr);
 myGLRT=glrtqcsig(dataVec,timeVec,psdPosFreq,sigVec);
-fprintf('\n借助glrtqcsig函数算出的GLRT值为%.4f \n',myGLRT);
+fprintf('\nThe GLRT value calculated using glrtqcsig function is %.4f (借助glrtqcsig函数算出的GLRT值为%.4f) \n',myGLRT,myGLRT);
 %% Estimate the distribution of GLRT under the null and alternative hypotheses 估计GLRT在原假设和备择假设下的分布
 % Number of data realizations to generate under each hypothesis 在每个假设下生成的数据实现数量。
 nRlz = 500;
@@ -130,9 +130,10 @@ for lpr = 1:nRlz
 end
 
 % Plot histograms 绘制直方图。
-figure("Name",'Plot histograms 绘制直方图');
+figure("Name",'Plot histograms (绘制直方图)');
 hold on;
 histogram(glrtH0, 'Normalization', "pdf");
 histogram(glrtH1, 'Normalization', "pdf")
-legend('H0 only Noise', 'H1 Noise+Signal');
-xlabel('GLRT');
+legend('H0 only Noise (H0仅噪声)', 'H1 Noise+Signal (H1噪声+信号)');
+xlabel('GLRT (广义似然比检验)');
+ylabel('PDF (概率密度)');

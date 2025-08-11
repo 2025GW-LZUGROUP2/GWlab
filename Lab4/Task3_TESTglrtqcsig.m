@@ -1,7 +1,7 @@
-%%测试函数glrtqcsig.m
+%% Test function glrtqcsig.m (测试函数glrtqcsig.m)
 clc; clear;
 syms t;
-%注意，为了运行本文件，需要Lab1文件夹，至少需要其中的GWlab\Lab1\Lab1SigDef.m和GWlab\Lab1\Signal.m
+% Note: To run this file, you need Lab1 folder, at least GWlab\Lab1\Lab1SigDef.m and GWlab\Lab1\Signal.m (注意：运行本文件需Lab1文件夹)
 addpath ../Lab1
 %% Parameters for data realization 数据实现的参数
 % Number of samples and sampling frequency. 样本数和采样频率。
@@ -58,4 +58,4 @@ llr = innerProdPSD(dataVec, templateVec, sampFreq, psdPosFreq);
 llr = llr ^ 2;
 disp(llr);
 myGLRT=glrtqcsig(dataVec,timeVec,psdPosFreq,sigVec);
-fprintf('\n借助glrtqcsig函数算出的GLRT值为%.4f \n',myGLRT);
+fprintf('\nThe GLRT value calculated using glrtqcsig function is %.4f (借助glrtqcsig函数算出的GLRT值为%.4f) \n',myGLRT,myGLRT);

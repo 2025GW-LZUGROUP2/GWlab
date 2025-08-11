@@ -1,6 +1,29 @@
 clc; clear;
 syms t;
 addpath ../Lab1
+% Task 4 (任务：第4组)
+% - Three data instances are provided in DETEST/data<n>.txt, where n=1,2,3
+%   (已提供3个数据实例，名为DETEST/data<n>.txt，其中𝑛=1,2,3)
+% - Each instance is a time series with sampling frequency 1024 Hz
+%   (每个实例是采样频率为1024Hz的时间序列)
+% - The signal in each data instance is a quadratic chirp with unknown amplitude (could be zero!)
+%   (每个数据实例中的信号是二次调频率，但振幅未知（也可能为零！）)
+%   Signal parameters: a1=10; a2=3; a3=3;
+%   (信号参数为：a1=10；a2=3；a3=3；)
+% - The noise power spectral density used is in DETEST/SNRCalc.m
+%   (使用的噪声功率谱密度在DETEST/SNRCalc.m中)
+%   noisePSD = @(f) (f>=100 & f<=300).*(f-100).*(300-f)/10000 + 1;
+% - Calculate the generalized likelihood ratio test (GLRT) statistic for each of the 3 data instances using glrtqcsig.m
+%   (使用glrtqcsig.m为3个数据实例中的每个计算广义似然比检验统计量（GLRT）)
+% - Generate M data instances under H₀ (no signal) and estimate the significance of the GLRT value for each of the 3 given data instances
+%   (在𝐻₀（无信号）下生成M个数据实例，并使用相关的GLRT值来估计3个给定数据实例中每个GLRT值的显著性)
+%   Keep increasing M until the significance obtained stabilizes
+%   (不断增加M，直到获得的显著性稳定)
+%   If your code runs slowly, consider how to speed it up
+%   (如果你的代码运行缓慢，考虑如何加快它)
+%   Learn to use the 'profile' command in Matlab to check which parts of your code consume the most time and what measures can be taken to speed it up
+%   (学习在Matlab中使用'profile'命令检查代码中消耗时间最多的部分以及可以采取哪些措施来加快它)ms t;
+addpath ../Lab1
 % 任务：第4组
 %  已提供3个数据实例，名为DETEST/data<n>.txt，其中𝑛=1,2,3
 %  每个实例是采样频率为1024Hz的时间序列
@@ -21,45 +44,45 @@ sampFreq = 1024;
 timeVec = (0:(nSamples - 1)) / sampFreq;
 timeLen = timeVec(end) - timeVec(1);
 
-%% 生成噪声PSD向量，应覆盖所有正DFT频率。
+%% Generate noise PSD vector that should cover all positive DFT frequencies (生成噪声PSD向量，应覆盖所有正DFT频率)
 noisePSD = @(f) (f >= 100 & f <= 300) .* (f - 100) .* (300 - f) / 10000 + 1;
 dataLen = nSamples / sampFreq;
 kNyq = floor(nSamples / 2) + 1;
 posFreq = (0:(kNyq - 1)) * (1 / dataLen);
 psdPosFreq = noisePSD(posFreq);
-figure("Name", '噪声PSD');
+figure("Name", 'Noise PSD (噪声PSD)');
 plot(posFreq, psdPosFreq);
 axis([0, posFreq(end), 0, max(psdPosFreq)]);
-xlabel('Frequency (Hz)');
-ylabel('PSD ((data unit)^2/Hz)');
+xlabel('Frequency (Hz) (频率(赫兹))');
+ylabel('PSD ((data unit)^2/Hz) (功率谱密度)');
 
-%% 定义二次调频信号的参数和表达式
-% Define parameters and expression for the quadratic chirp signal
-coeffNames_qc = {'a_1', 'a_2', 'a_3', 'A'}; % 参数名称
-syms(coeffNames_qc{:}); % 定义符号变量
-phi_qc = 2 * pi * (a_1 * t + a_2 * t ^ 2 + a_3 * t ^ 3); % 相位表达式
-sigExpr_qc = A * sin(phi_qc); % 信号表达式
-coeffValues_qc = [10, 3, 3, 1]; % 参数值 %因为振幅未知且会归一化，设振幅为1
+%% Define parameters and expression for the quadratic chirp signal (定义二次调频信号的参数和表达式)
+coeffNames_qc = {'a_1', 'a_2', 'a_3', 'A'}; % Parameter names (参数名称)
+syms(coeffNames_qc{:}); % Define symbolic variables (定义符号变量)
+phi_qc = 2 * pi * (a_1 * t + a_2 * t ^ 2 + a_3 * t ^ 3); % Phase expression (相位表达式)
+sigExpr_qc = A * sin(phi_qc); % Signal expression (信号表达式)
+coeffValues_qc = [10, 3, 3, 1]; % Parameter values (参数值) - Because amplitude is unknown and will be normalized, set amplitude to 1 (因为振幅未知且会归一化，设振幅为1)
 Sig_qc = Signal('Quadratic Chirp', timeVec, sigExpr_qc, ...
-    t, coeffNames_qc, coeffValues_qc); % 创建信号对象
+    t, coeffNames_qc, coeffValues_qc); % Create signal object (创建信号对象)
 
-SigNow = Sig_qc; % 当前信号
+SigNow = Sig_qc; % Current signal (当前信号)
 SigVec = SigNow.SigVec;
-%%使用glrtqcsig.m为3个数据实例（data）中的每个计算广义似然比检验统计量（GLRT）
+%% Calculate GLRT statistic for each of the 3 data instances using glrtqcsig.m (使用glrtqcsig.m为3个数据实例中的每个计算广义似然比检验统计量)
 GLRT_data1 = glrtqcsig(dataVec1, timeVec, psdPosFreq, SigVec);
 GLRT_data2 = glrtqcsig(dataVec2, timeVec, psdPosFreq, SigVec);
 GLRT_data3 = glrtqcsig(dataVec3, timeVec, psdPosFreq, SigVec);
-fprintf('data 1:借助glrtqcsig函数算出的GLRT值为%.4f \n', GLRT_data1);
-fprintf('data 2:借助glrtqcsig函数算出的GLRT值为%.4f \n', GLRT_data2);
-fprintf('data 3:借助glrtqcsig函数算出的GLRT值为%.4f \n', GLRT_data3);
+fprintf('Data 1: GLRT value calculated using glrtqcsig function is %.4f (借助glrtqcsig函数算出的GLRT值为%.4f) \n', GLRT_data1, GLRT_data1);
+fprintf('Data 2: GLRT value calculated using glrtqcsig function is %.4f (借助glrtqcsig函数算出的GLRT值为%.4f) \n', GLRT_data2, GLRT_data2);
+fprintf('Data 3: GLRT value calculated using glrtqcsig function is %.4f (借助glrtqcsig函数算出的GLRT值为%.4f) \n', GLRT_data3, GLRT_data3);
 
 
-%%在𝐻₀（无信号）下(y=n, <y.s>=<n.s>)生成M个数据实例，并使用相关的GLRT值来估计3个给定数据实例中每个GLRT值的显著性
-%不断增加M，直到获得的显著性稳定
+%% Generate M data instances under H₀ (no signal, y=n, <y.s>=<n.s>) and estimate the significance of each GLRT value
+% (在𝐻₀（无信号）下生成M个数据实例，并使用相关的GLRT值来估计3个给定数据实例中每个GLRT值的显著性)
+% Keep increasing M until the significance obtained stabilizes (不断增加M，直到获得的显著性稳定)
 
-% Generate a noise realization from a stochastic process with the specified PSD 从具有指定PSD的随机过程生成噪声实现。
+% Generate a noise realization from a stochastic process with the specified PSD (从具有指定PSD的随机过程生成噪声实现)
 
-Rlz=5*nSamples;%模拟realization的次数
+Rlz=5*nSamples; % Number of realizations to simulate (模拟realization的次数)
 
 % DSVec=zeros(1,Rlz);%detection statistic Vector 统计检测量向量
 % for i = 1:Rlz
@@ -98,22 +121,22 @@ varNglrt=var(DSVec,1);%variant of noise GLRT
 signfc1=sum(DSVec>GLRT_data1)/Rlz;
 signfc2=sum(DSVec>GLRT_data2)/Rlz;
 signfc3=sum(DSVec>GLRT_data3)/Rlz;
-fprintf('significance of data1: %.5f \nsignificance of data2: %.5f \nsignificance of data3: %.5f \n',signfc1,signfc2,signfc3);
+fprintf('Significance of data1: %.5f (数据1的显著性: %.5f) \nSignificance of data2: %.5f (数据2的显著性: %.5f) \nSignificance of data3: %.5f (数据3的显著性: %.5f) \n',signfc1,signfc1,signfc2,signfc2,signfc3,signfc3);
 alpha1=(GLRT_data1-meanNglrt)/varNglrt;
 alpha2=(GLRT_data2-meanNglrt)/varNglrt;
 alpha3=(GLRT_data3-meanNglrt)/varNglrt;
-fprintf('alpha of data1: %.5f \nalpha of data2: %.5f \nalpha of data3: %.5f \n',alpha1,alpha2,alpha3);
-% 绘制GLRT噪声分布直方图及观测值
-figure('Name','GLRT值与噪声分布');
+fprintf('Alpha of data1: %.5f (数据1的alpha值: %.5f) \nAlpha of data2: %.5f (数据2的alpha值: %.5f) \nAlpha of data3: %.5f (数据3的alpha值: %.5f) \n',alpha1,alpha1,alpha2,alpha2,alpha3,alpha3);
+% Plot histogram of GLRT noise distribution and observed values (绘制GLRT噪声分布直方图及观测值)
+figure('Name','GLRT Values and Noise Distribution (GLRT值与噪声分布)');
 histogram(DSVec, 50, 'FaceAlpha', 0.5, 'FaceColor', [0 0.447 0.741]);
 hold on;
 xline(GLRT_data1, 'r--', 'LineWidth', 1.5, 'Label', sprintf('GLRT1: %.2f', GLRT_data1), 'LabelOrientation','horizontal');
 xline(GLRT_data2, 'g--', 'LineWidth', 1.5, 'Label', sprintf('GLRT2: %.2f', GLRT_data2), 'LabelOrientation','horizontal');
 xline(GLRT_data3, 'm--', 'LineWidth', 1.5, 'Label', sprintf('GLRT3: %.2f', GLRT_data3), 'LabelOrientation','horizontal');
-title('GLRT值与噪声分布');
-xlabel('GLRT Value');
-ylabel('Frequency');
-legend('Noise GLRT Distribution', 'GLRT1', 'GLRT2', 'GLRT3');
+title('GLRT Values and Noise Distribution (GLRT值与噪声分布)');
+xlabel('GLRT Value (GLRT值)');
+ylabel('Frequency (频数)');
+legend('Noise GLRT Distribution (噪声GLRT分布)', 'GLRT1', 'GLRT2', 'GLRT3');
 grid on;
 hold off;
 % %
