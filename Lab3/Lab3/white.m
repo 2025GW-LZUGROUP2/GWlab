@@ -4,15 +4,15 @@ rng(0);
 % 参数设置
 N = 10000;  % 每组样本数量
 groups = {
-    struct('name', 'Group 1: μ=0, σ=1',   'mu', 0, 'sigma', 1),  % 标准差=1
-    struct('name', 'Group 2: μ=0, σ=2',   'mu', 0, 'sigma', 2),  % 标准差=2
-    struct('name', 'Group 3: μ=0, Var=2', 'mu', 0, 'sigma', sqrt(2)), % 方差=2 → 标准差=√2
+    struct('name', 'Group 1: μ=0, σ=1',   'mu', 0, 'sigma', 1);  % 标准差=1
+    struct('name', 'Group 2: μ=0, σ=2',   'mu', 0, 'sigma', 2);  % 标准差=2
+    struct('name', 'Group 3: μ=0, Var=2', 'mu', 0, 'sigma', sqrt(2)); % 方差=2 → 标准差=√2
     struct('name', 'Group 4: μ=2, Var=2', 'mu', 2, 'sigma', sqrt(2))  % 方差=2 → 标准差=√2
 };
 
 % 预存储结果
 results = cell(length(groups), 1);
-figure;
+figure('Name', 'Gaussian White Noise Distributions');
 
 % 生成每组噪声并分析
 for i = 1:length(groups)
@@ -36,18 +36,18 @@ for i = 1:length(groups)
     theory_pdf = (1/(groups{i}.sigma*sqrt(2*pi))) * exp(-(x - groups{i}.mu).^2 / (2*groups{i}.sigma^2));
     plot(x, theory_pdf, 'r-', 'LineWidth', 1.5);
     
-    title(sprintf('%s\n样本均值: %.4f, 样本标准差: %.4f', groups{i}.name, sample_mean, sample_std));
-    xlabel('幅值');
-    ylabel('概率密度');
-    legend('样本分布', '理论PDF');
+    title(sprintf('%s\nMean: %.4f, Std: %.4f', groups{i}.name, sample_mean, sample_std));
+    xlabel('Amplitude');
+    ylabel('Probability Density');
+    legend('Sample', 'Theory');
     grid on;
     hold off;
 end
 
 % 调整布局
-set(gcf, 'Position', [100, 100, 800, 1200]); % 设置图像尺寸
-sgtitle('不同参数高斯白噪声的分布对比 (N=10,000)'); % 总标题
+set(gcf, 'Position', [100, 100, 800, 800]);
+sgtitle('Gaussian White Noise Distributions (N=10,000)');
 
 % 显示统计结果
-disp('统计结果:');
+disp('Statistical Results:');
 cellfun(@disp, results);

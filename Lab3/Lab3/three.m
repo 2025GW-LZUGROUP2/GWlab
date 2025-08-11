@@ -9,7 +9,7 @@ rho_biv = -0.8;         % 相关系数
 if exist('plotbivarcontours', 'file')
     plotbivarcontours(rho_biv, stdevX_biv, stdevY_biv, muVec_biv);
 else
-    disp('plotbivarcontours函数未找到，跳过二维绘图');
+    disp('plotbivarcontours函数未找到，跳过二维绘图 - plotbivarcontours function not found, skipping 2D plotting');
 end
 
 %% 2. 二变量相关系数生成
@@ -23,17 +23,17 @@ Z = sind(theta)*X + cosd(theta)*Y; % Z = sinθ*X + cosθ*Y
 
 % 计算并显示相关系数
 R_biv = corrcoef([W(:), Z(:)]);
-disp(['理论相关系数: ', num2str(rho)]);
-disp(['模拟相关系数: ', num2str(R_biv(1,2))]);
+disp(['理论相关系数: ', num2str(rho), ' - Theoretical Correlation Coefficient: ', num2str(rho)]);
+disp(['模拟相关系数: ', num2str(R_biv(1,2)), ' - Simulated Correlation Coefficient: ', num2str(R_biv(1,2))]);
 
 % 绘制散点图
-figure;
+figure('Name', 'W与Z的散点图 - Scatter Plot of W and Z');
 scatter(W, Z, 10, 'filled', 'MarkerFaceAlpha', 0.1);
 axis tight;
 axis equal;
-xlabel('W');
-ylabel('Z');
-title(['W与Z的散点图 (理论 \rho = ', num2str(rho), ')']);
+xlabel('W - W');
+ylabel('Z - Z');
+title(['W与Z的散点图 (理论 \rho = ', num2str(rho), ') - Scatter Plot of W and Z (Theoretical \rho = ', num2str(rho), ')']);
 grid on;
 
 %% 3. 三变量正态分布生成
@@ -60,12 +60,12 @@ end
 % 检查正定性（特征值均大于0）
 eigenvalues = eig(C);
 if any(eigenvalues <= 1e-8)
-    disp('协方差矩阵接近半正定，添加小扰动使其正定');
+    disp('协方差矩阵接近半正定，添加小扰动使其正定 - Covariance matrix nearly semi-positive definite, adding small perturbation to make it positive definite');
     minEig = min(eigenvalues);
     if minEig <= 0
         adjustment = abs(minEig) + 1e-5;
         C = C + adjustment * eye(3);
-        disp(['添加 ', num2str(adjustment), ' 到对角元素']);
+        disp(['添加 ', num2str(adjustment), ' 到对角元素 - Added ', num2str(adjustment), ' to diagonal elements']);
     end
 end
 
@@ -73,15 +73,15 @@ end
 try
     A = chol(C, 'lower');  % 获取下三角分解矩阵 C = A*A'
 catch ME
-    disp('Cholesky分解失败：');
+    disp('Cholesky分解失败 - Cholesky decomposition failed');
     disp(ME.message);
     % 使用替代方法（奇异值分解）
     [U, S, V] = svd(C);
     A = U * sqrt(S);  % A = U*sqrt(S)
-    disp('使用SVD替代Cholesky分解');
+    disp('使用SVD替代Cholesky分解 - Using SVD as an alternative to Cholesky decomposition');
 end
 
-disp('变换矩阵 A =');
+disp('变换矩阵 A = - Transformation Matrix A =');
 disp(A);
 
 % ===== 生成独立正态随机变量 =====
@@ -98,27 +98,27 @@ Z = A * X + muVec;  % 线性变换（均值偏移）
 % ===== 验证结果 =====
 % 计算样本均值
 mu_sim = mean(Z, 2);
-disp('目标均值:'); disp(muVec);
-disp('样本均值:'); disp(mu_sim);
+disp('目标均值: - Target Mean:'); disp(muVec);
+disp('样本均值: - Sample Mean:'); disp(mu_sim);
 
 % 计算样本协方差
 C_sim = cov(Z');  % cov函数要求行是变量，列是观测值
-disp('目标协方差矩阵:');
+disp('目标协方差矩阵: - Target Covariance Matrix:');
 disp(C);
-disp('样本协方差矩阵:');
+disp('样本协方差矩阵: - Sample Covariance Matrix:');
 disp(C_sim);
 
 % ===== 可视化 =====
 % 1. 三维散点图
-figure;
+figure('Name', '三元正态分布三维散点图 - 3D Scatter of Trivariate Normal');
 scatter3(Z(1,:), Z(2,:), Z(3,:), 10, 'filled', 'MarkerFaceAlpha', 0.1);
-xlabel('Z_1'); ylabel('Z_2'); zlabel('Z_3');
-title(['三元正态分布样本 (n=', num2str(nTrials), ')']);
+xlabel('Z_1 - Z_1'); ylabel('Z_2 - Z_2'); zlabel('Z_3 - Z_3');
+title(['三元正态分布样本 (n=', num2str(nTrials), ') - Trivariate Normal Samples (n=', num2str(nTrials), ')']);
 grid on;
 rotate3d on;  % 启用旋转
 
 % 2. 三变量边际分布直方图
-figure;
+figure('Name', '三变量边际分布直方图 - Marginal Distributions of Trivariate Normal');
 subplot(3,1,1);
 histogram(Z(1,:), 50, 'Normalization', 'pdf');
 hold on;
@@ -126,8 +126,8 @@ hold on;
 x1 = linspace(min(Z(1,:)), max(Z(1,:)), 200);
 pdf1 = normpdf(x1, muVec(1), sqrt(C(1,1)));
 plot(x1, pdf1, 'r', 'LineWidth', 2);
-title('Z_1 的边际分布');
-legend('样本分布', '理论分布');
+title('Z_1 的边际分布 - Marginal Distribution of Z_1');
+legend('样本分布 - Sample Distribution', '理论分布 - Theoretical Distribution');
 
 subplot(3,1,2);
 histogram(Z(2,:), 50, 'Normalization', 'pdf');
@@ -135,7 +135,8 @@ hold on;
 x2 = linspace(min(Z(2,:)), max(Z(2,:)), 200);
 pdf2 = normpdf(x2, muVec(2), sqrt(C(2,2)));
 plot(x2, pdf2, 'r', 'LineWidth', 2);
-title('Z_2 的边际分布');
+title('Z_2 的边际分布 - Marginal Distribution of Z_2');
+legend('样本分布 - Sample Distribution', '理论分布 - Theoretical Distribution');
 
 subplot(3,1,3);
 histogram(Z(3,:), 50, 'Normalization', 'pdf');
@@ -143,24 +144,25 @@ hold on;
 x3 = linspace(min(Z(3,:)), max(Z(3,:)), 200);
 pdf3 = normpdf(x3, muVec(3), sqrt(C(3,3)));
 plot(x3, pdf3, 'r', 'LineWidth', 2);
-title('Z_3 的边际分布');
+title('Z_3 的边际分布 - Marginal Distribution of Z_3');
+legend('样本分布 - Sample Distribution', '理论分布 - Theoretical Distribution');
 
 % 3. 成对变量散点图
-figure;
+figure('Name', '三变量成对散点图 - Pairwise Scatter Plots of Trivariate Normal');
 subplot(2,2,1);
 scatter(Z(1,:), Z(2,:), 10, 'filled', 'MarkerFaceAlpha', 0.1);
 axis equal; grid on;
-xlabel('Z_1'); ylabel('Z_2');
-title('Z_1 与 Z_2');
+xlabel('Z_1 - Z_1'); ylabel('Z_2 - Z_2');
+title('Z_1 与 Z_2 - Z_1 vs Z_2');
 
 subplot(2,2,2);
 scatter(Z(1,:), Z(3,:), 10, 'filled', 'MarkerFaceAlpha', 0.1);
 axis equal; grid on;
-xlabel('Z_1'); ylabel('Z_3');
-title('Z_1 与 Z_3');
+xlabel('Z_1 - Z_1'); ylabel('Z_3 - Z_3');
+title('Z_1 与 Z_3 - Z_1 vs Z_3');
 
 subplot(2,2,3);
 scatter(Z(2,:), Z(3,:), 10, 'filled', 'MarkerFaceAlpha', 0.1);
 axis equal; grid on;
-xlabel('Z_2'); ylabel('Z_3');
-title('Z_2 与 Z_3');
+xlabel('Z_2 - Z_2'); ylabel('Z_3 - Z_3');
+title('Z_2 与 Z_3 - Z_2 vs Z_3');
