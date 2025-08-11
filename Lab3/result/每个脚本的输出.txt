@@ -1,0 +1,73 @@
+>> white
+Statistical Results:
+                         sample_mean    sample_std
+                         ___________    __________
+
+    Group 1: μ=0, σ=1     0.0016594      0.99148  
+
+                         sample_mean    sample_std
+                         ___________    __________
+
+    Group 2: μ=0, σ=2    -0.0040073       1.9797  
+
+                           sample_mean    sample_std
+                           ___________    __________
+
+    Group 3: μ=0, Var=2    -0.0053059       1.4135  
+
+                           sample_mean    sample_std
+                           ___________    __________
+
+    Group 4: μ=2, Var=2      1.9999         1.3947  
+
+>> 
+--------------------------------------
+
+>> three
+plotbivarcontours函数未找到，跳过二维绘图 - plotbivarcontours function not found, skipping 2D plotting
+理论相关系数: 0.57358 - Theoretical Correlation Coefficient: 0.57358
+模拟相关系数: 0.56945 - Simulated Correlation Coefficient: 0.56945
+变换矩阵 A = - Transformation Matrix A =
+    2.0000         0         0
+    0.6000    1.6248         0
+   -0.4000    0.5170    1.2541
+
+目标均值: - Target Mean:
+     2
+     1
+     3
+
+样本均值: - Sample Mean:
+    2.0067
+    1.0039
+    3.0000
+
+目标协方差矩阵: - Target Covariance Matrix:
+    4.0000    1.2000   -0.8000
+    1.2000    3.0000    0.6000
+   -0.8000    0.6000    2.0000
+
+样本协方差矩阵: - Sample Covariance Matrix:
+    3.9868    1.1931   -0.8136
+    1.1931    3.0004    0.5949
+   -0.8136    0.5949    2.0052
+
+
+----------------------------------
+>> JinYuhan.m
+
+高斯噪声组 1: 实际均值=-0.0104, 实际标准差=1.0058 - Gaussian Noise Group 1: Actual Mean=-0.0104, Actual Std=1.0058
+高斯噪声组 2: 实际均值=-0.0067, 实际标准差=1.9830 - Gaussian Noise Group 2: Actual Mean=-0.0067, Actual Std=1.9830
+高斯噪声组 3: 实际均值=-0.0165, 实际标准差=1.3929 - Gaussian Noise Group 3: Actual Mean=-0.0165, Actual Std=1.3929
+高斯噪声组 4: 实际均值=1.9947, 实际标准差=1.4236 - Gaussian Noise Group 4: Actual Mean=1.9947, Actual Std=1.4236
+白化前信噪比: 1.0728 - SNR Before Whitening: 1.0728
+白化后信噪比: 3.4024 - SNR After Whitening: 3.4024
+频率向量长度: 82 - Frequency Vector Length: 82
+第一个频率: 0.0000, 最后一个频率: 2048.0000 - First Frequency: 0.0000, Last Frequency: 2048.0000
+奈奎斯特频率: 2048.0000 - Nyquist Frequency: 2048.0000
+频率向量是否单调递增: 1 - Is Frequency Vector Monotonically Increasing: 1
+归一化后的最后频率: 1.0000 - Normalized Last Frequency: 1.0000
+>> 
+
+
+

@@ -1,155 +1,113 @@
-%本文件将一次性完成Lab1的所有任务
-%我们定义了一个类Signal 用于描述和生成参数化数学信号，支持符号表达式、参数替换和信号向量生成。
-%请使用命令help Signal;help ExactEstmFreqBW;以帮助你理解此文件
+% This script completes all Lab1 tasks in one go (本文件将一次性完成Lab1的所有任务)
+% We define a class Signal to describe and generate parameterized mathematical signals, supporting symbolic expressions, parameter substitution, and signal vector generation. (定义了Signal类)
+% Use help Signal; help ExactEstmFreqBW; for more info. (请使用help命令查看帮助)
 
 clc; clear;
-% 定义符号变量
+% Define symbolic variable (定义符号变量)
 syms t;
-SNR = 10; %信噪比
-tIntvl = [0, 1]; % timeInterval 时间区间[0,1]
-fsInit = 300; % 先给一个较高的采样率，保证后续分析准确
+SNR = 10; % Signal-to-noise ratio (信噪比)
+tIntvl = [0, 1]; % Time interval [0,1] (时间区间)
+fsInit = 300; % Initial high sampling rate (初始采样率)
 timeLength = tIntvl(2) - tIntvl(1);
 timeVec = (tIntvl(1):1 / fsInit:tIntvl(2));
-run(fullfile(fileparts(mfilename('fullpath')), 'Lab1SigDef.m')) %引用Lab1SigDef.m文件(这个文件定义了各个信号)
+run(fullfile(fileparts(mfilename('fullpath')), 'Lab1SigDef.m')) % Reference Lab1SigDef.m (引用信号定义文件)
 
-%% 定义所有信号类型及其属性
-% 信号对象数组
+%% Define all signal types and properties (定义所有信号类型及属性)
 SigCho = [Sig_qc, Sig_lc, Sig_ss, Sig_FM, Sig_Sg, Sig_AM, Sig_AMFM];
-
-% 信号类型标识符
 SigTypes = {'qc', 'lc', 'ss', 'FM', 'Sg', 'AM', 'AMFM'};
-
-% 标准正弦类信号的phi映射
 PhiMap = struct();
 PhiMap.qc = phi_qc;
 PhiMap.lc = phi_lc;
 PhiMap.ss = phi_ss;
 PhiMap.FM = phi_FM;
 
-% 信号类型对应的文件夹名称（英文+中文）
 signalNames = struct();
-signalNames.qc = 'Quadratic Chirp二次调频信号';
-signalNames.lc = 'Linear Chirp线性调频信号';
-signalNames.ss = 'Sinusoidal Signal正弦信号';
-signalNames.FM = 'Frequency Modulated (FM) Sinusoid频率调制正弦信号';
-signalNames.Sg = 'Sine-Gaussian Signal正弦-高斯信号';
-signalNames.AM = 'Amplitude Modulated (AM) Sinusoid幅度调制正弦信号';
-signalNames.AMFM = 'AM-FM Sinusoid幅度-频率调制正弦信号';
+signalNames.qc = 'Quadratic Chirp (二次调频)';
+signalNames.lc = 'Linear Chirp (线性调频)';
+signalNames.ss = 'Sinusoidal Signal (正弦)';
+signalNames.FM = 'FM Sinusoid (频率调制)';
+signalNames.Sg = 'Sine-Gaussian (正弦-高斯)';
+signalNames.AM = 'AM Sinusoid (幅度调制)';
+signalNames.AMFM = 'AM-FM Sinusoid (幅频调制)';
 
-% 创建主结果目录
 scriptDir = fileparts(mfilename('fullpath'));
 resultDir = fullfile(scriptDir, 'result');
 if ~exist(resultDir, 'dir')
     mkdir(resultDir);
-    fprintf('创建主结果目录: %s\n', resultDir);
+    fprintf('Created main result directory: %s (创建主结果目录)\n', resultDir);
 end
 
-%% 循环处理每种信号
+%% Process each signal type (循环处理每种信号)
 for sigIdx = 1:length(SigCho)
     try
-        % 1. 选择当前信号和设置参数
         SigNow = SigCho(sigIdx);
         currentType = SigTypes{sigIdx};
-        
         fprintf('\n\n============================================\n');
-        fprintf('处理信号类型: %s - %s\n', currentType, signalNames.(currentType));
+        fprintf('Processing signal type: %s - %s\n', currentType, signalNames.(currentType));
         fprintf('============================================\n');
-        
-        % 设置phiNow - 根据信号类型判断
         if isfield(PhiMap, currentType)
-            % 标准正弦类信号
             phiNow = PhiMap.(currentType);
-            fprintf('设置标准正弦类信号phi参数\n');
+            fprintf('Set phi for standard sinusoid (设置标准正弦phi)\n');
         else
-            % 非标准正弦类，置空
             phiNow = [];
-            fprintf('设置非标准正弦类信号，phi参数为空\n');
+            fprintf('Non-standard sinusoid, phi is empty (非标准正弦phi为空)\n');
         end
-        
-        % 2. 信号参数计算
         maxFreq = ExactEstmFreqBW(SigNow);
         NyqFreq = 2 * maxFreq;
-        sampFreq = 5 * NyqFreq; %采样频率 5倍安全系数
+        sampFreq = 5 * NyqFreq;
         sampIntvl = 1 / sampFreq;
         timeVec = tIntvl(1):sampIntvl:tIntvl(2);
-        
-        % 3. 生成信号
-        SigNow.timeVec = timeVec; %更新SigNow，使其生成正确的SigVec
-        SigVec = SigNow.SigVec; %取出生成的SigVec
-        SigVec = SNR * SigVec / norm(SigVec); %归一化
-        N = length(timeVec); %时间向量的分量数
+        SigNow.timeVec = timeVec;
+        SigVec = SigNow.SigVec;
+        SigVec = SNR * SigVec / norm(SigVec);
+        N = length(timeVec);
         fftVec = fft(SigVec);
     catch e
-        fprintf('处理信号 %s 时发生错误：%s\n', currentType, e.message);
-        fprintf('跳过此信号，继续处理下一个\n');
+        fprintf('Error processing signal %s: %s (处理信号出错)\n', currentType, e.message);
+        fprintf('Skip this signal and continue (跳过此信号)\n');
         continue;
     end
-    %% 画信号图，信号的Signal-Time图
-    fi1=figure('Name', ['信号的Signal-Time图 - ', currentType]);
+    %% Plot Signal-Time
+    fi1=figure('Name', ['Signal-Time - ', currentType]);
     plot(timeVec, SigVec, 'Marker', '.', 'MarkerSize', 20);
-    xlabel('Time/s');
+    xlabel('Time (s) (时间)');
     ylabel('Signal');
-    title(['信号: ', signalNames.(currentType)]);
-    
-    %% 画Periodogram图，信号的|fft|-f图
-    fprintf('判断标准：如果0-NyqFreq区间内，覆盖了|fft|的绝大部分面积，即可认为maxFreq估计正确');
-    NyqLimIdx = floor(N / 2) + 1; %Nyquist Limit频率所对应的指数 Nyquist Limit Index(the the index when f=fs/2)
+    title(['Signal: ', signalNames.(currentType)]);
+    %% Plot Periodogram (|fft|-f)
+    fprintf('Criterion: If most |fft| area is within 0-NyqFreq, maxFreq is correct. (判断标准)\n');
+    NyqLimIdx = floor(N / 2) + 1;
     posFreq = (0:(NyqLimIdx - 1) / timeLength);
     fftVec_posFreq = fftVec(1:NyqLimIdx);
-    fi2=figure('Name', ['Periodogram图，信号的|fft|-f图 - ', currentType], 'Position', [100 100 800 600]);
+    fi2=figure('Name', ['Periodogram |fft|-f - ', currentType], 'Position', [100 100 800 600]);
     fftline = plot(posFreq, abs(fftVec_posFreq));
     hold on;
-    xlabel("频率Frequency(Hz)");
-    ylabel("|fft|");
-    title(['信号: ', signalNames.(currentType)]);
-    
-    % 填充曲线下方的颜色
-    fillX = [posFreq(posFreq <= NyqFreq), NyqFreq]; % 添加 NyqFreq 作为最后一个点
-    fillY = [abs(fftVec_posFreq(1:sum(posFreq <= NyqFreq))), 0]; % 对应 NyqFreq 的 y 值为 0
+    xlabel('Frequency (Hz) (频率)');
+    ylabel('|fft|');
+    title(['Signal: ', signalNames.(currentType)]);
+    fillX = [posFreq(posFreq <= NyqFreq), NyqFreq];
+    fillY = [abs(fftVec_posFreq(1:sum(posFreq <= NyqFreq))), 0];
     fill([fillX, flip(fillX)], [fillY, zeros(size(fillY))], 'cyan', 'FaceAlpha', 0.3, 'EdgeColor', 'none');
     h1 = xline(maxFreq, 'r--', 'LineWidth', 1);
     h2 = xline(NyqFreq, 'b--', 'LineWidth', 1);
     grid on;
-    legend([fftline, h1, h2], {'|fft|', 'max Frequency(band width)', 'Nyquist Frequency'});
-    
-    %% compare
-    fi3=figure("Name", ['periodogram - ', currentType]);
+    legend([fftline, h1, h2], {'|fft|', 'max Frequency', 'Nyquist Frequency'});
+    %% Compare periodogram
+    fi3=figure("Name", ['Periodogram Compare - ', currentType]);
     [pxx, w] = periodogram(SigVec, rectwin(N), N, sampFreq); 
     plot(w,sqrt(length(pxx)*abs(pxx)))
-    xlabel("频率Frequency(Hz)");
-    title(['信号: ', signalNames.(currentType)]);
-    
-    %% Play the signal!
-    % sound(SigNow.SigVec);
-    %>> help sound
-    %  sound - 将信号数据矩阵转换为声音
-    %     此 MATLAB 函数 以默认采样率 8192 Hz 向扬声器发送音频信号 y。
-    
-    %     语法
-    %       sound(y)
-    %       sound(y,Fs)
-    %       sound(y,Fs,nBits)
-    
-    %     输入参数
-    %       y - 音频数据
-    %         数值向量 | 数值矩阵
-    %       Fs - 采样率
-    %         8192 (默认值) | 正标量
-    %       nBits - 采样位数。
-    %         16 (默认值) | 8 | 24
-    
-    %% 画出时频图spectrogram
-    fi4=figure("Name", ['spectrogram时频图 - ', currentType]);
-    winTlen = 0.2/20; % second
-    ovlTlen = 0.1/20; % second
+    xlabel('Frequency (Hz) (频率)');
+    title(['Signal: ', signalNames.(currentType)]);
+    %% Spectrogram
+    fi4=figure("Name", ['Spectrogram - ', currentType]);
+    winTlen = 0.2/20;
+    ovlTlen = 0.1/20;
     winSamplN = floor(winTlen * sampFreq * 10);
     ovlSamplN = floor(ovlTlen * sampFreq * 10);
     [S, F, T] = spectrogram(SigVec, winSamplN, ovlSamplN, [], sampFreq * 10);
     imagesc(T, F, abs(S));
     axis xy;
-    xlabel('Time /s'); ylabel('Frequency /Hz')
-    title(['信号: ', signalNames.(currentType)]);
-
+    xlabel('Time (s) (时间)'); ylabel('Frequency (Hz) (频率)')
+    title(['Signal: ', signalNames.(currentType)]);
 
 
 
