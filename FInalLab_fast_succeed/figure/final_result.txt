@@ -1,0 +1,16 @@
+最优参数：a1=48.749542, a2=30.866800, a3=9.814910,  SNR=8.706032
+总耗时：117.473 秒（约 1.96 分钟）
+
+a1: 48.7495
+              a2: 30.8668
+              a3: 9.8149
+             SNR: 8.7060
+     bestFitness: -75.7950
+            rmin: [0 0 0]
+            rmax: [100 100 100]
+    WelchNperseg: 256
+         PSDHalf: 1
+           Iters: 100
+         PopSize: 100
+           NRuns: 200
+     UseParallel: 1

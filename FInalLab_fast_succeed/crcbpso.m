@@ -1,65 +1,70 @@
 
-function returnData=crcbpso_alt(fitfuncHandle,nDim,varargin)
-% Local-best (lbest) PSO minimizer (implements flowchart in the CRC book)  % 局部最优（lbest）PSO最小化器（实现CRC书中的流程图）
-%P = CRCBPSO()  % P = CRCBPSO()
-%Simply returns a structure containing the PSO parameters and their default  % 仅返回包含PSO参数及其默认值的结构体
-%values.  %
+function returnData=crcbpso(fitfuncHandle,nDim,varargin)
+% Local-best (lbest) PSO minimizer
+% 局部最优（lbest）粒子群优化（PSO）最小化器
+%P = CRCBPSO()
+% Simply returns a structure containing the PSO parameters and their default values.
+% 仅返回一个包含PSO参数及其默认值的结构体。
 %
-% S=CRCBPSO(Fhandle,N)  % S=CRCBPSO(Fhandle,N)
-% Runs local best PSO on the fitness function with handle Fhandle. If Fname  % 对适应度函数句柄Fhandle运行局部最优PSO。如果Fname是函数名，Fhandle = @(x) <Fname>(x, FP)。N为适应度函数的维数。
-% is the name of the function, Fhandle = @(x) <Fname>(x, FP).  N is the  % 输出以结构体S返回。S的字段有：
-% dimensionality of the  fitness function.  The output is returned in the  %
-% structure S. The field of S are:  %
-%  'bestLocation : Best location found (in standardized coordinates)  %  'bestLocation'：找到的最佳位置（标准化坐标）
-%  'bestFitness': Best fitness value found  %  'bestFitness'：找到的最佳适应度值
-%  'totalFuncEvals': Total number of fitness function evaluations. This can  %  'totalFuncEvals'：适应度函数总评估次数。该值可能小于迭代次数与粒子数的乘积，因为粒子可能离开并重新进入搜索空间。
-%                    be less than the product of the number of iterations  %
-%                    and the number of particles since particles can leave  %
-%                    and re-enter the search space.  %
+% S=CRCBPSO(Fhandle,N)
+% Runs local best PSO on the fitness function with handle Fhandle. If Fname is the name of the function, Fhandle = @(x) <Fname>(x, FP).  N is the dimensionality of the  fitness function.  The output is returned in the structure S. The field of S are:
+% 在适应度函数句柄Fhandle上运行局部最优PSO。如果Fname是函数名，则Fhandle = @(x) <Fname>(x, FP)。N为适应度函数的维数。输出以结构体S返回，S的字段如下：
+%  'bestLocation' : Best location found (in standardized coordinates)
+%                  找到的最佳位置（标准化坐标）
+%  'bestFitness' : Best fitness value found
+%                  找到的最佳适应度值
+%  'totalFuncEvals' : Total number of fitness function evaluations. This can be less than the product of the number of iterations and the number of particles since particles can leave and re-enter the search space.
+%                     适应度函数评估的总次数。由于粒子可以离开并重新进入搜索空间，因此该值可能小于迭代次数与粒子数的乘积。
 %
-%S=CRCBPSO(Fhandle,N,P)  % S=CRCBPSO(Fhandle,N,P)
-%overrides the default PSO parameters with those provided in structure P.  % 用结构体P中提供的参数覆盖默认PSO参数
-%Set any of the fields of P to [] in order to invoke the corresponding  % 将P的任意字段设为[]以调用对应的默认值
-%default value. The fields of P are as follows.  % P的字段如下：
-%     'popSize': Number of PSO particles  % 'popSize'：PSO粒子数
-%     'maxSteps': Number of iterations for termination  % 'maxSteps'：终止迭代次数
-%     'c1','c2': acceleration constant  % 'c1','c2'：加速常数
-%     'maxVelocity': maximum value for each velocity component for all  % 'maxVelocity'：所有后续迭代中每个速度分量的最大值
-%                     subsequent iterations  %
-%     'startInertia': Starting value of inertia weight  % 'startInertia'：惯性权重初始值
-%     'endInertia': End value of inertia   % 'endInertia'：惯性权重终值
-%     'endInertiaIter': Iteration number at which endInertia is reached. If  % 'endInertiaIter'：达到endInertia的迭代次数。如果小于maxSteps，惯性权重保持为endInertia。
-%     less than maxSteps, inertia stays constant at endInertia.  %
-%     'boundaryCond': Set to '' for the "let them fly" boundary condition.  % 'boundaryCond'：设为''表示“让其飞出”边界条件，其他值传递给适应度函数进一步处理
-%                     Any other value is passed onto the fitness function  %
-%                     for further processing.   %
-%     'nbrhdSz' : Number of particles in a ring topology neighborhood.  % 'nbrhdSz'：环形拓扑邻域中的粒子数
-%                 Reset to 3 if less than 3.  % 若小于3则重置为3
-%Setting P to [] will invoke the default values for all pso parameters.  % P设为[]将调用所有PSO参数的默认值
-%NOTE: The optional P argument is normally to be used only for testing and  % 注意：可选P参数通常仅用于测试和调试（如减少粒子数和/或迭代次数以快速运行）。
-%debugging (e.g., reduce the number of particles and/or iterations for a  % 基线默认值在本函数中硬编码。
-%quick run). Baseline default values are hardcoded in this function.  %
+% S=CRCBPSO(Fhandle,N,P)
+% Overrides the default PSO parameters with those provided in structure P.
+% 用结构体P中提供的参数覆盖默认PSO参数。
+% Set any of the fields of P to [] in order to invoke the corresponding default value. The fields of P are as follows.
+% 将P的任意字段设为[]以调用相应的默认值。P的字段如下：
+%     'popSize' : Number of PSO particles
+%                 PSO粒子数
+%     'maxSteps' : Number of iterations for termination
+%                  终止的迭代次数
+%     'c1','c2' : acceleration constant
+%                  加速常数
+%     'maxVelocity' : maximum value for each velocity component for all subsequent iterations
+%                     每个速度分量在所有后续迭代中的最大值
+%     'startInertia' : Starting value of inertia weight
+%                      初始惯性权重
+%     'endInertia' : End value of inertia 
+%                    终止惯性权重
+%     'endInertiaIter' : Iteration number at which endInertia is reached. If less than maxSteps, inertia stays constant at endInertia.
+%                        达到endInertia的迭代次数。如果小于maxSteps，则惯性在endInertia处保持不变。
+%     'boundaryCond' : Set to '' for the "let them fly" boundary condition. Any other value is passed onto the fitness function for further processing. 
+%                      设为''表示“自由飞行”边界条件，其他值将传递给适应度函数进一步处理。
+%     'nbrhdSz' : Number of particles in a ring topology neighborhood. Reset to 3 if less than 3.
+%                 环形拓扑邻域中的粒子数。如果小于3则重置为3。
+% Setting P to [] will invoke the default values for all pso parameters.
+% 将P设为[]将调用所有PSO参数的默认值。
+% NOTE: The optional P argument is normally to be used only for testing and debugging (e.g., reduce the number of particles and/or iterations for a quick run). Baseline default values are hardcoded in this function.
+% 注意：可选参数P通常仅用于测试和调试（例如减少粒子数和/或迭代次数以快速运行）。基线默认值在本函数中硬编码。
 %
-%S = CRCBPSO(Fhandle,N,P,O)  % S = CRCBPSO(Fhandle,N,P,O)
-%O is an integer that controls the amount of information returned in S. The  % O为整数，控制S中返回信息的多少。O的默认值为0，返回如上定义的S。
-%default value of O is zero and returns S as the struct defined above.  %
-%Progressively higher values of O increase the number of fields in S as  % O值越高，S中字段越多，具体如下：
-%listed below.  %
-%   'allBestFit': O = 1. Best fitness values for all iterations returned as a vector.  % 'allBestFit'：O=1时，所有迭代的最佳适应度值以向量返回
-%   'allBestLoc': O = 2. Best locations in standardized coordinates for all  % 'allBestLoc'：O=2时，所有迭代的最佳位置（标准化坐标）以矩阵行返回
-%                 iterations returned as a row of a matrix.   %
+% S = CRCBPSO(Fhandle,N,P,O)
+% O is an integer that controls the amount of information returned in S. The default value of O is zero and returns S as the struct defined above. Progressively higher values of O increase the number of fields in S as listed below.
+% O为整数，控制S中返回信息的多少。O的默认值为0，返回如上所述的结构体S。更高的O值会增加S中的字段，具体如下：
+%   'allBestFit': O = 1. Best fitness values for all iterations returned as a vector.
+%                 O=1时，返回所有迭代的最佳适应度值向量。
+%   'allBestLoc': O = 2. Best locations in standardized coordinates for all iterations returned as a row of a matrix. 
+%                 O=2时，返回所有迭代的最佳标准化坐标。
 %
-%Example:  % 示例：
-%nDim = 5;  % nDim = 5;
-%fitFuncParams = struct('rmin',-5*ones(1,nDim),...  % fitFuncParams = struct('rmin',-5*ones(1,nDim),...
-%                           'rmax',5*ones(1,nDim));  % 'rmax',5*ones(1,nDim));
-%fitFuncHandle = @(x) crcbpsotestfunc(x,fitFuncParams);  % fitFuncHandle = @(x) crcbpsotestfunc(x,fitFuncParams);
-%psoOut = crcbpso(fitFuncHandle,5);  % psoOut = crcbpso(fitFuncHandle,5);
-
-% Authors  % 作者
-% Soumya D. Mohanty, Dec 2018  % Soumya D. Mohanty, 2018年12月
-% Adapted from LDACSchool/ldacpso.m  % 改编自LDACSchool/ldacpso.m
-%   %
+% Example:
+% 例子：
+% nDim = 5;
+% fitFuncParams = struct('rmin',-5*ones(1,nDim),...
+%                           'rmax',5*ones(1,nDim));
+% fitFuncHandle = @(x) crcbpsotestfunc(x,fitFuncParams);
+% psoOut = crcbpso(fitFuncHandle,5);
+%
+% Authors
+% 作者：
+% Soumya D. Mohanty, Dec 2018
+% Adapted from LDACSchool/ldacpso.m
+% 
 
 %Baseline (also default) PSO parameters
 popsize=40;
@@ -215,67 +220,29 @@ nColsPop = length([partCoordCols,partVelCols,partPbestCols,partFitPbestCols,...
                    partFlagFitEvalCols,partFitEvalsCols]);
 pop=zeros(popsize,nColsPop);
 
-%Initialize positions
+% Best value found by the swarm over its history
+gbestVal = inf;  
+% Location of the best value found by the swarm over its history
+gbestLoc = 2*ones(1,nDim);
+% Best value found by the swarm at the current iteration
+bestFitness = inf;
 pop(:,partCoordCols)=rand(popsize,nDim);
 %mount on our seeded locations
 if (nrowSeed>0) && (ncolSeed>0)
     pop(1:nrowSeed,1:ncolSeed)=seedMatrix;
 end
-%Compute fitness values
-fitnessValues = fitfuncHandle(pop(:,partCoordCols));
-pop(:,partFitCurrCols)=fitnessValues(:);
-%Increment number of fitness values evaluated
-pop(:,partFitEvalsCols)=1;
-%Set flag for evaluation of fitness value
-pop(:,partFlagFitEvalCols)=1;
-%Initialize pbest
-pop(:,partPbestCols)=pop(:,partCoordCols);
-%Set fitness at pbest
-pop(:,partFitPbestCols)= pop(:,partFitCurrCols);
-%Obtain local best
-%TODO: Make local best calculation a function instead of repeating the code
-pop(:,partFitLbestCols)= inf;
-for k = 1:popsize
-    %Get indices of neighborhood particles
-    ringNbrs = [(k-leftNbrs):(k-1),k,(k+1):(k+rightNbrs)];
-    adjstIndx = ringNbrs<1;
-    ringNbrs(adjstIndx) = ringNbrs(adjstIndx)+popsize;
-    adjstIndx = ringNbrs>popsize;
-    ringNbrs(adjstIndx) = ringNbrs(adjstIndx) - popsize;
-    %Get local best in neighborhood
-    [~,lbestPart] = min(pop(ringNbrs,partFitCurrCols));
-    lbestTruIndx = ringNbrs(lbestPart);
-    lbestCurrSnr = pop(lbestTruIndx,partFitCurrCols);
-    if lbestCurrSnr < pop(k,partFitLbestCols)
-        pop(k,partFitLbestCols) = lbestCurrSnr;
-        pop(k,partLocalBestCols) = pop(lbestTruIndx,partCoordCols);
-    end
-end
-pop(:,partInertiaCols)=0;
-%Obtain gbest
-gbestVal = inf;  
-gbestLoc = zeros(1,nDim);
-[bestFitness,bestParticle]=min(pop(:,partFitCurrCols));
-if gbestVal > bestFitness
-    gbestVal = bestFitness;
-    gbestLoc = pop(bestParticle,partCoordCols);
-else
-end
-%Initialize velocities
 pop(:,partVelCols)= -pop(:,partCoordCols) + rand(popsize,nDim);
+pop(:,partPbestCols)=pop(:,partCoordCols);
+pop(:,partFitPbestCols)= inf;
+pop(:,partFitCurrCols)=0;
+pop(:,partFitLbestCols)= inf;
+pop(:,partLocalBestCols) = 0;
+pop(:,partFlagFitEvalCols)=1;
+pop(:,partInertiaCols)=0;
+pop(:,partFitEvalsCols)=0;
 
 %Start PSO iterations ...
 for lpc_steps=1:maxSteps
-    %Update positions
-    pop(:,partCoordCols)=pop(:,partCoordCols)+pop(:,partVelCols);
-    for k = 1:popsize
-        if any(pop(k,partCoordCols)> 1 | ...
-                pop(k,partCoordCols)< 0)
-            pop(k,partFlagFitEvalCols)= 0;
-        else
-            pop(k,partFlagFitEvalCols)=1;
-        end
-    end
     %Evaluate particle fitnesses under ...
     if isempty(bndryCond)
         %Invisible wall boundary condition
@@ -294,7 +261,6 @@ for lpc_steps=1:maxSteps
             funcCount = 0;
         end
         pop(k,partFitEvalsCols)=pop(k,partFitEvalsCols)+funcCount;
-        %Update pbest
         if pop(k,partFitPbestCols) > pop(k,partFitCurrCols)
             pop(k,partFitPbestCols) = pop(k,partFitCurrCols);
             pop(k,partPbestCols) = pop(k,partCoordCols);
@@ -346,6 +312,14 @@ for lpc_steps=1:maxSteps
         if ~isempty(maxvBustCompNeg)
             pop(k,partVelCols(maxvBustCompNeg))= -max_velocity(1);
         end
+        pop(k,partCoordCols)=pop(k,partCoordCols)+pop(k,partVelCols);
+        if any(pop(k,partCoordCols)> 1 | ...
+                pop(k,partCoordCols)< 0)
+            pop(k,partFitCurrCols)= inf;
+            pop(k,partFlagFitEvalCols)= 0;
+        else
+            pop(k,partFlagFitEvalCols)=1;
+        end
     end
     
     %Record extended output if needed
@@ -367,3 +341,8 @@ actualEvaluations = sum(pop(:,partFitEvalsCols));
 returnData.totalFuncEvals = actualEvaluations;
 returnData.bestLocation = gbestLoc;
 returnData.bestFitness = gbestVal; 
+
+
+
+
+
